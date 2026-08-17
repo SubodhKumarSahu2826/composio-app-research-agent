@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attio — AI App Integration Research</title>
+<link rel="stylesheet" href="../report.css">
+</head>
+<body>
+
+    <nav class="site-nav">
+        <div class="nav-inner">
+            <a class="brand" href="overview.html">AI App Research Agent</a>
+            <div class="nav-links">
+                <a class="nav-link " href="overview.html">Overview</a><a class="nav-link " href="cross_app_analysis.html">Cross-App Analysis</a><a class="nav-link active" href="applications.html">Applications</a><a class="nav-link " href="execution.html">Execution & Methodology</a>
+            </div>
+        </div>
+    </nav>
+    
+<header class="page-header">
+    <div class="container">
+        <div class="eyebrow">AI Engineering Case Study</div>
+        <h1>Attio</h1>
+    </div>
+</header>
+<main>
+    <div class="container"><a class="back-link" href="applications.html">← Back to applications</a>
+    <section class="application-card">
+
+        <div class="application-header">
+            <div>
+                <div class="eyebrow">CRM and Sales</div>
+                <h2>Attio</h2>
+                <p class="description">Attio is a data-driven CRM platform that enables teams to build custom data models with flexible objects, attributes, lists, and workflows, supported by a public REST API and developer tools.</p>
+            </div>
+
+            <div class="application-id">
+                App ID: 4
+            </div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric">
+                <span class="metric-label">Buildability</span>
+                <span class="badge success">
+                    Easy
+                </span>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">Verification</span>
+                <span class="badge success">
+                    PASSED
+                </span>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">Quality Score</span>
+                <strong>95.2/100</strong>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">Evidence</span>
+                <strong>5</strong>
+            </div>
+        </div>
+
+        <div class="two-column">
+            <div class="panel">
+                <h3>Authentication</h3>
+
+                <div class="field">
+                    <span>Methods</span>
+                    <strong>OAuth2, Bearer Token, Basic</strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>90%</strong>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Access</h3>
+
+                <div class="field">
+                    <span>Type</span>
+                    <strong>Self-serve / Free</strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>85%</strong>
+                </div>
+
+                <div class="requirements">
+                    <span>Requirements</span>
+                    <ul><li>Attio workspace account</li><li>Developer account</li></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="two-column">
+            <div class="panel">
+                <h3>API</h3>
+
+                <div class="field">
+                    <span>Type</span>
+                    <strong>REST</strong>
+                </div>
+
+                <div class="field">
+                    <span>Breadth</span>
+                    <strong>Broad</strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>90%</strong>
+                </div>
+
+                
+        <a class="source-link"
+           href="https://docs.attio.com/rest-api/overview"
+           target="_blank"
+           rel="noopener noreferrer">
+            API documentation
+        </a>
+        
+            </div>
+
+            <div class="panel">
+                <h3>MCP</h3>
+
+                <div class="field">
+                    <span>Status</span>
+                    <span class="badge warning">
+                        Unknown
+                    </span>
+                </div>
+
+                <div class="field">
+                    <span>Official</span>
+                    <strong>
+                        Unknown
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>88%</strong>
+                </div>
+
+                
+            </div>
+        </div>
+
+        <div class="panel buildability-panel">
+            <h3>Buildability Assessment</h3>
+            
+            <p>Attio offers a well-documented public REST API covering broad CRM objects and features, self-serve access token generation in workspace settings, OAuth support, and an official hosted MCP server.</p>
+        </div>
+
+        <div class="panel">
+            <h3>Verification</h3>
+
+            <div class="field">
+                <span>Score</span>
+                <strong>0.95</strong>
+            </div>
+
+            <p class="muted">No verification errors.</p>
+            
+        <div class="issue-section">
+            <h4>Warnings</h4>
+            <ul><li>MCP is marked Unknown even though official MCP evidence appears to be present.</li></ul>
+        </div>
+        
+        </div>
+
+        <div class="panel">
+            <h3>Research Quality</h3>
+
+            <div class="two-column">
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>Good</strong>
+                </div>
+
+                <div class="field">
+                    <span>Evidence Coverage</span>
+                    <strong>High</strong>
+                </div>
+            </div>
+
+            
+        <div class="issue-section">
+            <h4>Strengths</h4>
+            <ul><li>Research contains multiple evidence sources.</li><li>Multiple official sources support the research.</li><li>Authentication method is identified.</li><li>A public API surface was identified.</li></ul>
+        </div>
+        
+            
+        <div class="issue-section">
+            <h4>Warnings</h4>
+            <ul><li>MCP availability could not be determined.</li></ul>
+        </div>
+        
+        </div>
+
+        <div class="panel">
+            <h3>Evidence</h3>
+
+            <div class="evidence-list">
+                
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 1
+                    </span>
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Overview</h4>
+                <p class="claim">Attio provides a public REST API exchanging JSON over HTTPS and maintains developer documentation covering authentication, rate limits, and webhooks.</p>
+                <p class="snippet">&gt; ## Documentation Index
+&gt;
+&gt; Fetch the complete documentation index at:&lt;/llms.txt&gt;
+&gt;
+&gt; Use this file to discover all available pages before exploring further.
+
+The legacy `app.ts` layout is deprecated. New apps use the folder-based layout under `src/app/`; convert existing apps with the migration guide.
+
+Attio Docs home page
+
+OverviewApp SDKREST APIMCPSQLShare
+
+Introduction
+
+# Overview
+
+Learn about the REST API
+
+Attio provides a public REST API which exchanges JSON over HTTPS. In this section, y</p>
+                
+            <a class="source-link"
+               href="https://docs.attio.com/rest-api/overview"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 2
+                    </span>
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Attio Developer Terms</h4>
+                <p class="claim">Attio provides terms for developer accounts, the App SDK, API apps, and marketplace listing.</p>
+                <p class="snippet">1.12. &quot;Documentation&quot; means any documentation or materials related to a Licensed Component that is provided or made available by Attio to Developer under these Attio Developer Terms.
+
+   1.13. &quot;Licensed Components&quot; means the App SDK and the authentication process to access the Attio API.
+
+   1.14. &quot;Published App&quot; means a Developed App which is approved by Attio to be listed in the App Marketplace.
+
+   1.15. &quot;Sample Code&quot; means any sample software in source code format provided or made available</p>
+                
+            <a class="source-link"
+               href="https://attio.com/legal/attio-developer-terms"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 3
+                    </span>
+                    <span class="badge neutral">
+                        official_github
+                    </span>
+                </div>
+
+                <h4>api-evangelist/attio: API and integration profile for Attio. - GitHub</h4>
+                <p class="claim">Attio&#x27;s REST API provides full CRUD access to records, objects, attributes, lists, entries, tasks, notes, threads, comments, workspace members, and webhooks using Bearer token authentication.</p>
+                <p class="snippet">## APIs
+
+### Attio REST API
+
+Public REST API for the Attio CRM platform with full CRUD access to records, objects, attributes, lists, entries, tasks, notes, threads, comments, workspace members, and webhooks. Authentication uses a Bearer access token in the Authorization header and the API publishes a public OpenAPI specification.
+
+ Human URL: 
+ Base URL: `
+
+#### Tags
+
+ CRM
+ Sales
+ Contacts
+ Companies
+ Lists
+ Workflows
+
+#### Properties
+
+ Documentation
+ OpenAPI — OpenAPI Specification
+ Developer</p>
+                
+            <a class="source-link"
+               href="https://github.com/api-evangelist/attio"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 4
+                    </span>
+                    <span class="badge neutral">
+                        third_party
+                    </span>
+                </div>
+
+                <h4>Attio API Guide: Developer Account Setup, API Keys and ...</h4>
+                <p class="claim">Developers can create integrations self-serve within Attio workspace settings, authenticating via Bearer access tokens, OAuth, or HTTP Basic authentication.</p>
+                <p class="snippet">Where can I find the Attio API docs?
+
+The Attio API docs are at developers.attio.com/docs. They cover authentication, available endpoints, object references (users, workspaces, records), attribute types, and rate limiting rules. Attio API rate limits allow 100 read requests per second and 25 write requests per second, with HTTP 429 returned when limits are exceeded.
+
+What are Attio&#x27;s API rate limits?
+
+Attio&#x27;s API enforces 100 requests per second for read operations and 25 requests per second for</p>
+                
+            <a class="source-link"
+               href="https://www.stacksync.com/blog/how-to-get-an-attio-developer-account-and-start-working-with-attios-api"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 5
+                    </span>
+                    <span class="badge neutral">
+                        third_party
+                    </span>
+                </div>
+
+                <h4>Attio MCP: The Official Server and What It Can Do</h4>
+                <p class="claim">Attio maintains an official hosted Model Context Protocol (MCP) server at mcp.attio.com/mcp.</p>
+                <p class="snippet">## What the Attio MCP server does
+
+Model Context Protocol (MCP) is the open standard that lets an AI client — Claude, ChatGPT, Cursor, and others — talk to an outside app through a shared interface. Attio maintains an official hosted server at `mcp.attio.com/mcp`, and it authenticates you as your own Attio user, so the AI gets exactly the permissions your account already has: reads are auto-approved, and writes ask for confirmation before they touch your data.
+
+With it connected, an AI client ca</p>
+                
+            <a class="source-link"
+               href="https://www.usecarly.com/blog/attio-mcp"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+            </div>
+        </div>
+
+    </section>
+    </div>
+</main>
+<footer><div class="container">AI App Integration Research Agent · Generated from saved research artifacts</div></footer>
+</body>
+</html>

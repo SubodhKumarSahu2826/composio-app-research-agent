@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Podio — AI App Integration Research</title>
+<link rel="stylesheet" href="../report.css">
+</head>
+<body>
+
+    <nav class="site-nav">
+        <div class="nav-inner">
+            <a class="brand" href="overview.html">AI App Research Agent</a>
+            <div class="nav-links">
+                <a class="nav-link " href="overview.html">Overview</a><a class="nav-link " href="cross_app_analysis.html">Cross-App Analysis</a><a class="nav-link active" href="applications.html">Applications</a><a class="nav-link " href="execution.html">Execution & Methodology</a>
+            </div>
+        </div>
+    </nav>
+    
+<header class="page-header">
+    <div class="container">
+        <div class="eyebrow">AI Engineering Case Study</div>
+        <h1>Podio</h1>
+    </div>
+</header>
+<main>
+    <div class="container"><a class="back-link" href="applications.html">← Back to applications</a>
+    <section class="application-card">
+
+        <div class="application-header">
+            <div>
+                <div class="eyebrow">CRM and Sales</div>
+                <h2>Podio</h2>
+                <p class="description">Podio is a work management and CRM platform whose entire frontend functionality is exposed via a programmable REST API.</p>
+            </div>
+
+            <div class="application-id">
+                App ID: 6
+            </div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric">
+                <span class="metric-label">Buildability</span>
+                <span class="badge success">
+                    Easy
+                </span>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">Verification</span>
+                <span class="badge success">
+                    PASSED
+                </span>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">Quality Score</span>
+                <strong>96.8/100</strong>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">Evidence</span>
+                <strong>5</strong>
+            </div>
+        </div>
+
+        <div class="two-column">
+            <div class="panel">
+                <h3>Authentication</h3>
+
+                <div class="field">
+                    <span>Methods</span>
+                    <strong>OAuth2</strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>95%</strong>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Access</h3>
+
+                <div class="field">
+                    <span>Type</span>
+                    <strong>Self-serve / Free</strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>95%</strong>
+                </div>
+
+                <div class="requirements">
+                    <span>Requirements</span>
+                    <ul><li>Podio account (free or premium)</li><li>API Key / OAuth credentials registered from account settings</li></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="two-column">
+            <div class="panel">
+                <h3>API</h3>
+
+                <div class="field">
+                    <span>Type</span>
+                    <strong>REST</strong>
+                </div>
+
+                <div class="field">
+                    <span>Breadth</span>
+                    <strong>Broad</strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>95%</strong>
+                </div>
+
+                
+        <a class="source-link"
+           href="https://developers.podio.com/"
+           target="_blank"
+           rel="noopener noreferrer">
+            API documentation
+        </a>
+        
+            </div>
+
+            <div class="panel">
+                <h3>MCP</h3>
+
+                <div class="field">
+                    <span>Status</span>
+                    <span class="badge warning">
+                        Unknown
+                    </span>
+                </div>
+
+                <div class="field">
+                    <span>Official</span>
+                    <strong>
+                        Unknown
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>0%</strong>
+                </div>
+
+                
+            </div>
+        </div>
+
+        <div class="panel buildability-panel">
+            <h3>Buildability Assessment</h3>
+            
+            <p>Podio provides a well-documented public REST API with OAuth2 authentication that is completely free to use for all free and premium account holders without access barriers.</p>
+        </div>
+
+        <div class="panel">
+            <h3>Verification</h3>
+
+            <div class="field">
+                <span>Score</span>
+                <strong>1.00</strong>
+            </div>
+
+            <p class="muted">No verification errors.</p>
+            <p class="muted">No verification warnings.</p>
+        </div>
+
+        <div class="panel">
+            <h3>Research Quality</h3>
+
+            <div class="two-column">
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>High</strong>
+                </div>
+
+                <div class="field">
+                    <span>Evidence Coverage</span>
+                    <strong>High</strong>
+                </div>
+            </div>
+
+            
+        <div class="issue-section">
+            <h4>Strengths</h4>
+            <ul><li>Research contains multiple evidence sources.</li><li>Multiple official sources support the research.</li><li>Authentication method is identified.</li><li>A public API surface was identified.</li></ul>
+        </div>
+        
+            
+        <div class="issue-section">
+            <h4>Warnings</h4>
+            <ul><li>MCP availability could not be determined.</li></ul>
+        </div>
+        
+        </div>
+
+        <div class="panel">
+            <h3>Evidence</h3>
+
+            <div class="evidence-list">
+                
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 1
+                    </span>
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Authentication - Podio API Documentation</h4>
+                <p class="claim">Podio API uses the OAuth2 protocol for authentication across server-side, client-side, username and password, and app authentication flows.</p>
+                <p class="snippet">Podio
+
+ Getting started
+ Get an API key
+ Authentication
+  + Scopes &amp; Permissions
+  + Server-side flow
+  + Client-side flow
+  + Username &amp; password flow
+  + App authentication flow
+ API Reference
+ Tutorials
+ Client Libraries
+ Developer Forums
+ Partner Extensions
+ Terms of Use
+
+# How to authenticate with Podio API
+
+The Podio API uses the OAuth2 protocol for authentication. This allows external apps to request authorization to Podio without having direct access to the user&#x27;s password. Our API suppo</p>
+                
+            <a class="source-link"
+               href="https://developers.podio.com/authentication"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 2
+                    </span>
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Frequently Asked Questions - Podio API Documentation</h4>
+                <p class="claim">The Podio API is free to use for both premium and free Podio accounts with full access and no extra charge.</p>
+                <p class="snippet">The recommended authentication method for the Podio API is the OAuth server-side flow. We recognize that this is not a great way to authenticate automated scripts. For those situations it&#x27;s recommended that you authenticate using app authentication. With app authentication you can authenticate as a single Podio app using a special app token.
+
+#### How can I get API tokens programmatically?
+
+App tokens are available in the developer info section of any Podio app, but sometimes it&#x27;s useful to be a</p>
+                
+            <a class="source-link"
+               href="https://developers.podio.com/index/faq"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 3
+                    </span>
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Podio API Documentation: Developers</h4>
+                <p class="claim">The entire Podio frontend is built on the API, exposing all functionality for developers with an API key from their account settings.</p>
+                <p class="snippet">You will probably also want to look at our client libraries to see if we have one available for your prefered language or platform.
+
+If you need a hand, please post in the API developer forum.
+
+#### Developers
+
+#### About Podio
+
+#### Contact
+
+#### Follow
+
+#### Go Mobile
+
+Access your activity streams, apps, tasks, inbox and contacts with the Podio mobile app. Get work done anywhere. [...] ### What can you do with it?
+
+Quite a lot! In fact, the entire Podio frontend is built on the API, and we&#x27;ve</p>
+                
+            <a class="source-link"
+               href="https://developers.podio.com/"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 4
+                    </span>
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Items | API Documentation</h4>
+                <p class="claim">Podio API documentation covers broad platform features including items, applications, spaces, organizations, contacts, files, tasks, and webhooks.</p>
+                <p class="snippet">Podio
+
+ Getting started
+ Get an API key
+ Authentication
+ API Reference
+  + Actions
+  + Alerts
+  + App market
+  + Applications
+  + Batch
+  + Calendar
+  + Comments
+  + Contacts
+  + Conversations
+  + Devices
+  + Email
+  + Embeds
+  + Files
+  + Flows
+  + Forms
+  + Friends
+  + Grants
+  + Hooks
+  + Importer
+  + Integrations
+  + Items
+  + Layout
+  + Linked Accounts
+  + Notifications
+  + OAuth authorization
+  + Organizations
+  + Questions
+  + Ratings
+  + Recurrence
+  + Reference
+  + Reminders
+  + Search</p>
+                
+            <a class="source-link"
+               href="https://developers.podio.com/doc/items"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 5
+                    </span>
+                    <span class="badge neutral">
+                        third_party
+                    </span>
+                </div>
+
+                <h4>Podio REST API — Documentation, OpenAPI</h4>
+                <p class="claim">Podio offers a REST API providing programmatic access to apps, items, workspaces, organizations, users, tasks, files, comments, and webhooks.</p>
+                <p class="snippet">View index file
+
+### API entry from apis.yml
+
+`aid: podio:rest-api
+name: Podio REST API
+description: REST API providing complete programmatic access to Podio apps, items, workspaces, organizations,
+users, tasks, files, comments, and webhooks. Authentication uses OAuth2 with several supported flows
+(server-side, client-side, password, and app authentication). Rate limits are adjustable upon request.
+humanURL: 
+baseURL: 
+tags:
+- Work Management
+- Collaboration
+- CRM
+- Custom Apps
+properties:
+- typ</p>
+                
+            <a class="source-link"
+               href="https://apis.io/apis/podio/rest-api"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+            </div>
+        </div>
+
+    </section>
+    </div>
+</main>
+<footer><div class="container">AI App Integration Research Agent · Generated from saved research artifacts</div></footer>
+</body>
+</html>

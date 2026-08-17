@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HubSpot — AI App Integration Research</title>
+<link rel="stylesheet" href="../report.css">
+</head>
+<body>
+
+    <nav class="site-nav">
+        <div class="nav-inner">
+            <a class="brand" href="overview.html">AI App Research Agent</a>
+            <div class="nav-links">
+                <a class="nav-link " href="overview.html">Overview</a><a class="nav-link " href="cross_app_analysis.html">Cross-App Analysis</a><a class="nav-link active" href="applications.html">Applications</a><a class="nav-link " href="execution.html">Execution & Methodology</a>
+            </div>
+        </div>
+    </nav>
+    
+<header class="page-header">
+    <div class="container">
+        <div class="eyebrow">AI Engineering Case Study</div>
+        <h1>HubSpot</h1>
+    </div>
+</header>
+<main>
+    <div class="container"><a class="back-link" href="applications.html">← Back to applications</a>
+    <section class="application-card">
+
+        <div class="application-header">
+            <div>
+                <div class="eyebrow">CRM and Sales</div>
+                <h2>HubSpot</h2>
+                <p class="description">HubSpot is an inbound marketing, sales, and customer service platform that integrates CRM, email automation, and analytics to facilitate lead nurturing and seamless customer experiences, functioning as a robust CRM and marketing automation platform.</p>
+            </div>
+
+            <div class="application-id">
+                App ID: 2
+            </div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric">
+                <span class="metric-label">Buildability</span>
+                <span class="badge warning">
+                    Possible
+                </span>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">Verification</span>
+                <span class="badge neutral">
+                    N/A
+                </span>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">Quality Score</span>
+                <strong>N/A</strong>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">Evidence</span>
+                <strong>7</strong>
+            </div>
+        </div>
+
+        <div class="two-column">
+            <div class="panel">
+                <h3>Authentication</h3>
+
+                <div class="field">
+                    <span>Methods</span>
+                    <strong>OAuth2, API Key</strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>95%</strong>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Access</h3>
+
+                <div class="field">
+                    <span>Type</span>
+                    <strong>Self-serve / Free</strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>95%</strong>
+                </div>
+
+                <div class="requirements">
+                    <span>Requirements</span>
+                    <ul><li>Developer Account</li><li>App Registration</li><li>Scope Configuration</li></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="two-column">
+            <div class="panel">
+                <h3>API</h3>
+
+                <div class="field">
+                    <span>Type</span>
+                    <strong>REST</strong>
+                </div>
+
+                <div class="field">
+                    <span>Breadth</span>
+                    <strong>Broad</strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>95%</strong>
+                </div>
+
+                
+        <a class="source-link"
+           href="https://developers.hubspot.com/docs/api-reference/latest/crm/understanding-the-crm"
+           target="_blank"
+           rel="noopener noreferrer">
+            API documentation
+        </a>
+        
+            </div>
+
+            <div class="panel">
+                <h3>MCP</h3>
+
+                <div class="field">
+                    <span>Status</span>
+                    <span class="badge success">
+                        Official MCP
+                    </span>
+                </div>
+
+                <div class="field">
+                    <span>Official</span>
+                    <strong>
+                        Yes
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>80%</strong>
+                </div>
+
+                
+            </div>
+        </div>
+
+        <div class="panel buildability-panel">
+            <h3>Buildability Assessment</h3>
+            
+            <p>A free developer account and app registration are required for API access. While technically feasible, the OAuth 2.0 implementation may have specific quirks that require additional effort and understanding from developers, moving it from &#x27;Easy&#x27; to &#x27;Possible&#x27;.</p>
+        </div>
+
+        <div class="panel">
+            <h3>Verification</h3>
+
+            <div class="field">
+                <span>Score</span>
+                <strong>N/A</strong>
+            </div>
+
+            <p class="muted">No verification errors.</p>
+            <p class="muted">No verification warnings.</p>
+        </div>
+
+        <div class="panel">
+            <h3>Research Quality</h3>
+
+            <div class="two-column">
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>Unknown</strong>
+                </div>
+
+                <div class="field">
+                    <span>Evidence Coverage</span>
+                    <strong>Unknown</strong>
+                </div>
+            </div>
+
+            
+            
+        </div>
+
+        <div class="panel">
+            <h3>Evidence</h3>
+
+            <div class="evidence-list">
+                
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 1
+                    </span>
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>HubSpot APIs | Authentication methods on HubSpot</h4>
+                <p class="claim">HubSpot&#x27;s APIs support authentication using OAuth and private app access tokens, in addition to other key types like Developer API keys and Personal Access Keys.</p>
+                <p class="snippet">There are two ways to authenticate calls to HubSpot’s APIs: OAuth, and private app access tokens. Below, learn more about each method and how to include it in your code for authorization. [...] The affected key and token types are listed below:
+
+ Developer API keys created within your app developer account.
+ Personal Access Keys used to authenticate commands in the HubSpot CLI.
+ Private access tokens used to authenticate requests in a private app.
+ SMTP tokens used for sending transactional emails.</p>
+                
+            <a class="source-link"
+               href="https://developers.hubspot.com/docs/apps/legacy-apps/authentication/intro-to-auth"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 2
+                    </span>
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Authentication overview - HubSpot docs</h4>
+                <p class="claim">OAuth authentication is required for distributing apps to multiple accounts, including through the HubSpot Marketplace, and Developer API keys are also available for certain features.</p>
+                <p class="snippet">If you plan to distribute your app to multiple accounts (either through listing on the HubSpot Marketplace or by managing specific authorized accounts), your app must be built using OAuth authentication. [...] Some app features and settings require a developer API key, which is available in the developer overview of your HubSpot account.</p>
+                
+            <a class="source-link"
+               href="https://developers.hubspot.com/docs/apps/developer-platform/build-apps/authentication/overview"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 3
+                    </span>
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Understanding the CRM APIs - HubSpot docs</h4>
+                <p class="claim">The HubSpot CRM API provides access to a broad range of objects, including Appointments, Calls, Companies, Contacts, Deals, Line Items, Marketing events, and Tickets.</p>
+                <p class="snippet">| Object | Type ID | Description |
+ --- 
+| Appointments | `0-421` | Represent encounters or services scheduled for an individual. View the appointments API |
+| Calls | `0-48` | A type of activity that represents phone call interactions associated with your records. View the calls API |
+| Companies | `0-2` | Stores information about a business or organization. View the companies API |
+| Contacts | `0-1` | Stores information about an individual person. View the contacts API | [...] | Line Items | `0-6` | Represent physical goods or services that are included in a quote or deal. View the line items API |
+| Marketing events | `0-54` | Represent events related to your marketing efforts, specifically including events from connected integrations. View the marketing events API |
+| Tickets | `0-5` | Represent customer requests for help or support, tracked through pipeline statuses. View the tickets API |</p>
+                
+            <a class="source-link"
+               href="https://developers.hubspot.com/docs/api-reference/latest/crm/understanding-the-crm"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 4
+                    </span>
+                    <span class="badge neutral">
+                        third_party
+                    </span>
+                </div>
+
+                <h4>Using the Hubspot API to Create or Update Companies ...</h4>
+                <p class="claim">Developers can sign up for a free HubSpot developer account, create a test account, and set up a private app to authenticate API requests using OAuth, requiring scope configuration.</p>
+                <p class="snippet">Before you can start creating or updating companies using the HubSpot API, you&#x27;ll need to set up a developer account and create a private app. [...] Visit the HubSpot Developer Portal and sign up for a free developer account. [...] create a test account to experiment with the API without affecting live data. [...] In your HubSpot account, navigate to Settings &gt; Integrations &gt; Private Apps. [...] Under the Scopes section, ensure you select the appropriate scopes for managing companies.</p>
+                
+            <a class="source-link"
+               href="https://endgrate.com/blog/using-the-hubspot-api-to-create-or-update-companies-(with-javascript-examples)"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 5
+                    </span>
+                    <span class="badge neutral">
+                        third_party
+                    </span>
+                </div>
+
+                <h4>How to Set Up HubSpot API Integration: A Quick Starter Guide - Coefficient</h4>
+                <p class="claim">HubSpot provides a free developer account with sandbox data and states that API keys are deprecated for new public apps, emphasizing OAuth 2.0.</p>
+                <p class="snippet">Start simple. Create a free HubSpot developer account. This gives you sandbox data without risking real customer information. [...] The developer account mirrors production functionality. Perfect for testing your integration logic. [...] OAuth 2.0 Knowledge: Understanding of OAuth flows (API keys are deprecated for new public apps).</p>
+                
+            <a class="source-link"
+               href="https://coefficient.io/hubspot-api/setup-hubspot-api-integration"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 6
+                    </span>
+                    <span class="badge neutral">
+                        third_party
+                    </span>
+                </div>
+
+                <h4>Navigating HubSpot&#x27;s Sunsetting API Keys</h4>
+                <p class="claim">HubSpot is transitioning from API keys to OAuth 2.0 for API authentication to enhance security.</p>
+                <p class="snippet">HubSpot’s move to sunset API keys means developers must transition to OAuth 2.0 for API authentication. This change enhances security by providing a more secure and flexible method for managing API access.</p>
+                
+            <a class="source-link"
+               href="https://growthnatives.com/blogs/hubspot/hubspot-sunsets-api-keys"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 7
+                    </span>
+                    <span class="badge neutral">
+                        third_party
+                    </span>
+                </div>
+
+                <h4>How to Connect with the HubSpot API</h4>
+                <p class="claim">HubSpot&#x27;s API uses REST endpoints with JSON payloads and OAuth 2.0, often utilizing Bearer tokens for authorization, though its OAuth implementation can have specific quirks.</p>
+                <p class="snippet">HubSpot&#x27;s API looks modern on the surface. REST endpoints, JSON payloads, OAuth 2.0, webhooks. [...] &#x27;Authorization&#x27;: `Bearer ${accessToken}` [...] HubSpot uses OAuth 2.0, which sounds standard until you realize their implementation has its own special flavor. You need three things before you even start: a developer account (separate from your regular HubSpot account), an app registration, and the patience of a saint.</p>
+                
+            <a class="source-link"
+               href="https://www.apideck.com/blog/how-to-connect-with-the-hubspot-api"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+            </div>
+        </div>
+
+    </section>
+    </div>
+</main>
+<footer><div class="container">AI App Integration Research Agent · Generated from saved research artifacts</div></footer>
+</body>
+</html>
