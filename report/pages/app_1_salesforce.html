@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salesforce — AI App Integration Research</title>
+<link rel="stylesheet" href="../report.css">
+</head>
+<body>
+
+    <nav class="site-nav">
+        <div class="nav-inner">
+            <a class="brand" href="overview.html">AI App Research Agent</a>
+            <div class="nav-links">
+                <a class="nav-link " href="overview.html">Overview</a><a class="nav-link " href="cross_app_analysis.html">Cross-App Analysis</a><a class="nav-link active" href="applications.html">Applications</a><a class="nav-link " href="execution.html">Execution & Methodology</a>
+            </div>
+        </div>
+    </nav>
+    
+<header class="page-header">
+    <div class="container">
+        <div class="eyebrow">AI Engineering Case Study</div>
+        <h1>Salesforce</h1>
+    </div>
+</header>
+<main>
+    <div class="container"><a class="back-link" href="applications.html">← Back to applications</a>
+    <section class="application-card">
+
+        <div class="application-header">
+            <div>
+                <div class="eyebrow">CRM and Sales</div>
+                <h2>Salesforce</h2>
+                <p class="description">Salesforce is a leading CRM platform that provides various APIs, including REST, for programmatic access to integrate data, perform complex operations, and manage application metadata. It also offers Salesforce Hosted MCP Servers for secure AI agent interoperability.</p>
+            </div>
+
+            <div class="application-id">
+                App ID: 1
+            </div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric">
+                <span class="metric-label">Buildability</span>
+                <span class="badge warning">
+                    Possible
+                </span>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">Verification</span>
+                <span class="badge neutral">
+                    N/A
+                </span>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">Quality Score</span>
+                <strong>N/A</strong>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">Evidence</span>
+                <strong>7</strong>
+            </div>
+        </div>
+
+        <div class="two-column">
+            <div class="panel">
+                <h3>Authentication</h3>
+
+                <div class="field">
+                    <span>Methods</span>
+                    <strong>OAuth2</strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>95%</strong>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Access</h3>
+
+                <div class="field">
+                    <span>Type</span>
+                    <strong>Paid Plan Required</strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>85%</strong>
+                </div>
+
+                <div class="requirements">
+                    <span>Requirements</span>
+                    <ul><li>Admin Approval Required</li></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="two-column">
+            <div class="panel">
+                <h3>API</h3>
+
+                <div class="field">
+                    <span>Type</span>
+                    <strong>REST</strong>
+                </div>
+
+                <div class="field">
+                    <span>Breadth</span>
+                    <strong>Broad</strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>95%</strong>
+                </div>
+
+                
+        <a class="source-link"
+           href="https://developer.salesforce.com/"
+           target="_blank"
+           rel="noopener noreferrer">
+            API documentation
+        </a>
+        
+            </div>
+
+            <div class="panel">
+                <h3>MCP</h3>
+
+                <div class="field">
+                    <span>Status</span>
+                    <span class="badge success">
+                        Official MCP
+                    </span>
+                </div>
+
+                <div class="field">
+                    <span>Official</span>
+                    <strong>
+                        Yes
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>100%</strong>
+                </div>
+
+                
+        <a class="source-link"
+           href="https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/hosted-mcp-servers-overview.html"
+           target="_blank"
+           rel="noopener noreferrer">
+            MCP documentation
+        </a>
+        
+            </div>
+        </div>
+
+        <div class="panel buildability-panel">
+            <h3>Buildability Assessment</h3>
+            
+            <p>Building an integration is technically feasible with public REST APIs and OAuth2 authentication. However, it requires an existing Salesforce organization, potentially a paid plan, and administrative approval/setup for API access and configuration of features like external client apps or MCP servers. A &#x27;Developer Org&#x27; might allow initial experimentation.</p>
+        </div>
+
+        <div class="panel">
+            <h3>Verification</h3>
+
+            <div class="field">
+                <span>Score</span>
+                <strong>N/A</strong>
+            </div>
+
+            <p class="muted">No verification errors.</p>
+            <p class="muted">No verification warnings.</p>
+        </div>
+
+        <div class="panel">
+            <h3>Research Quality</h3>
+
+            <div class="two-column">
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>Unknown</strong>
+                </div>
+
+                <div class="field">
+                    <span>Evidence Coverage</span>
+                    <strong>Unknown</strong>
+                </div>
+            </div>
+
+            
+            
+        </div>
+
+        <div class="panel">
+            <h3>Evidence</h3>
+
+            <div class="evidence-list">
+                
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 1
+                    </span>
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Authentication - Account Engagement API - Salesforce Developers</h4>
+                <p class="claim">Salesforce&#x27;s Account Engagement API supports authentication via OAuth 2.0 flows, requiring an access token obtained from the Salesforce OAuth Endpoint.</p>
+                <p class="snippet">There are numerous OAuth 2.0 Flow types supported. The Web Server Flow is the most commonly used. For a list of all flows, see the OAuth 2.0 Flows Help page. Read the descriptions of the flows to choose the best one for your case.
+
+After you get the access token, you must pass it and the Account Engagement Business Unit ID using the `Authorization` and `Pardot-Business-Unit-Id` headers.</p>
+                
+            <a class="source-link"
+               href="https://developer.salesforce.com/docs/marketing/pardot/guide/authentication.html"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 2
+                    </span>
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>OAuth and Connect REST API - Salesforce Developers</h4>
+                <p class="claim">The Connect REST API uses OAuth for application identification and requires setting up an external client app and authorization within a Salesforce organization.</p>
+                <p class="snippet">Connect REST API uses OAuth to securely identify your application before connecting to Salesforce. To use Connect REST API, create a REST entry point in your org. Salesforce defines this entry point as an external client app. See Step Two: Set Up Authorization to create your external client app.</p>
+                
+            <a class="source-link"
+               href="https://developer.salesforce.com/docs/platform/connect-rest-api/guide/intro_using_oauth.html"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 3
+                    </span>
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Salesforce Developers: Developer Portal</h4>
+                <p class="claim">Salesforce provides various APIs, including Salesforce REST API, B2C Commerce API, Marketing Cloud APIs (REST and SOAP), and Metadata API.</p>
+                <p class="snippet">## Discover Salesforce APIs and put them to work.
+
+### Salesforce REST API
+
+Integrate Salesforce data into apps and perform complex operations on a large scale.
+
+### B2C Commerce API
+
+Ensure omnichannel flexibility by using a headless API to build custom apps, from full storefronts to merchant tools.
+
+### Marketing Cloud APIs
+
+Create your ideal integration with the Marketing Cloud REST and SOAP APIs.
+
+### Metadata API
+
+Customize, deploy, package, and upgrade application metadata.</p>
+                
+            <a class="source-link"
+               href="https://developer.salesforce.com/"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 4
+                    </span>
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Get Started | Hosted MCP Servers - Salesforce Developers</h4>
+                <p class="claim">Salesforce offers &#x27;Hosted MCP Servers&#x27; that use the open Model Context Protocol (MCP) standard for secure agentic interoperability with AI clients, utilizing OAuth-based authentication.</p>
+                <p class="snippet">Salesforce Hosted MCP Servers give AI agents a secure, governed way to interact with Salesforce data and automation. Using the open Model Context Protocol (MCP) standard, any compatible AI client—Claude, ChatGPT, Cursor, or a custom agent—can connect to a Salesforce org and act on behalf of authorized users.
+
+Think of it as a universal connector: instead of building custom API integrations for each AI tool your team uses, you configure a server once in Salesforce, and any MCP-compatible client can connect to it by using standard OAuth-based authentication.</p>
+                
+            <a class="source-link"
+               href="https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/hosted-mcp-servers-overview.html"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 5
+                    </span>
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>REST API Developer Guide - SalesforceHow to Authenticate Salesforce REST APIs from Within ...Salesforce REST API: A Step-by-Step Guide- Updated 2026Connect REST API Developer Guide - SalesforceAuthentication in Salesforce: A Comprehensive Guide - LinkedIn</h4>
+                <p class="claim">The Lightning Platform REST API provides programmatic access to Salesforce data, allowing for creating, manipulating, and searching data using HTTP requests and a RESTful architecture.</p>
+                <p class="snippet">REST API provides you with programmatic access to your data in Salesforce. The flexibility and scalability of REST API make it an excellent choice for integrating Salesforce into your applications and for performing complex operations on a large scale. You can use REST API tools to create, manipulate, and search data in Salesforce by sending HTTP requests to endpoints in Salesforce. Depending on where you send requests, you access and operate on different pieces of information, called resources. Resources include records, query results, metadata, and more. REST API uses RESTful architecture to provide a straightforward and consistent interface.</p>
+                
+            <a class="source-link"
+               href="https://resources.docs.salesforce.com/latest/latest/en-us/sfdc/pdf/api_rest.pdf"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 6
+                    </span>
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Agentforce MCP Support - Salesforce</h4>
+                <p class="claim">Salesforce&#x27;s Agentforce supports Model Context Protocol (MCP) as an open standard for AI agents to connect with external tools, systems, and data, enhancing enterprise interoperability.</p>
+                <p class="snippet">Agentforce will provide secure, enterprise-grade agentic interoperability by leveraging Model Context Protocol (MCP). Connect your agents across systems, unlock and unify data, and drive trusted, differentiated customer experiences. It will be the trusted bridge for orchestrating digital labor across your entire business ecosystem.</p>
+                
+            <a class="source-link"
+               href="https://www.salesforce.com/agentforce/mcp-support"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 7
+                    </span>
+                    <span class="badge neutral">
+                        third_party
+                    </span>
+                </div>
+
+                <h4>Exploring the Salesforce Rest API</h4>
+                <p class="claim">The Salesforce REST API offers extensive capabilities for external systems or apps to access Salesforce data and metadata, handle bulk requests, and scale effectively.</p>
+                <p class="snippet">The above is just a drop in the ocean as to what the Salesforce REST API can achieve; if you have an external system or app that you wish to be able to access Salesforce data, or to be dynamically driven from Salesforce’s metadata, the REST API is there to help you out. With its consistent formatting and plethora of documentation, you can really extend the benefits of your Salesforce org far outside of it.
+
+Additionally, it has a great ability to scale and handle bulk requests, so the only real limitation is your imagination and willingness to experiment.</p>
+                
+            <a class="source-link"
+               href="https://www.salesforceben.com/exploring-the-salesforce-rest-api"
+               target="_blank"
+               rel="noopener noreferrer">
+                Open source
+            </a>
+            
+            </article>
+            
+            </div>
+        </div>
+
+    </section>
+    </div>
+</main>
+<footer><div class="container">AI App Integration Research Agent · Generated from saved research artifacts</div></footer>
+</body>
+</html>

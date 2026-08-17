@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Execution &amp; Methodology — AI App Integration Research</title>
+<link rel="stylesheet" href="../report.css">
+</head>
+<body>
+
+    <nav class="site-nav">
+        <div class="nav-inner">
+            <a class="brand" href="overview.html">AI App Research Agent</a>
+            <div class="nav-links">
+                <a class="nav-link " href="overview.html">Overview</a><a class="nav-link " href="cross_app_analysis.html">Cross-App Analysis</a><a class="nav-link " href="applications.html">Applications</a><a class="nav-link active" href="execution.html">Execution & Methodology</a>
+            </div>
+        </div>
+    </nav>
+    
+<header class="page-header">
+    <div class="container">
+        <div class="eyebrow">AI Engineering Case Study</div>
+        <h1>Execution &amp; Methodology</h1>
+    </div>
+</header>
+<main>
+    <div class="container">
+    <section>
+        <div class="notice danger">
+            <strong>Pipeline paused</strong>
+            <span>7 of 100 applications were completed before the pipeline paused. Gemini API quota exhausted. The current API project/model quota does not allow additional requests. Saved checkpoints allow the remaining applications to be resumed without re-running completed work.</span>
+        </div>
+    </section>
+
+    <section>
+        <h2>Research workflow</h2>
+        <div class="card-grid">
+            <article class="card"><h3>1. Dataset</h3><p>Load and validate the 100-app research dataset.</p></article>
+            <article class="card"><h3>2. Evidence retrieval</h3><p>Search official documentation and targeted integration sources.</p></article>
+            <article class="card"><h3>3. Composio discovery</h3><p>Check whether a matching Composio toolkit exists.</p></article>
+            <article class="card"><h3>4. Structured analysis</h3><p>Convert retrieved evidence into typed application findings.</p></article>
+            <article class="card"><h3>5. Verification</h3><p>Run deterministic consistency checks against evidence.</p></article>
+            <article class="card"><h3>6. Cross-app analysis</h3><p>Aggregate patterns, quality signals, and integration priority.</p></article>
+            <article class="card"><h3>7. Reporting</h3><p>Generate a deterministic multi-page case-study report.</p></article>
+        </div>
+    </section>
+
+    <section class="two-column">
+        <div class="panel">
+            <h2>Reproduce locally</h2>
+            <pre class="code-block">python -m src.pipeline --limit 5
+python -m src.cross_app_analysis
+python -m report.generate
+python -m pytest</pre>
+        </div>
+        <div class="panel">
+            <h2>Current execution</h2>
+            <div class="field"><span>Dataset</span><strong>100</strong></div>
+            <div class="field"><span>Completed</span><strong>7</strong></div>
+            <div class="field"><span>Failed / interrupted</span><strong>1</strong></div>
+            <div class="field"><span>Remaining</span><strong>92</strong></div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Submission limitation</h2>
+        <div class="notice danger">
+            <strong>Gemini API quota</strong>
+            <span>
+                The current saved execution contains 7 completed
+                applications from the 100-app dataset. The pipeline paused when the
+                Gemini API quota was exhausted. Checkpointed results can be resumed
+                when quota becomes available.
+            </span>
+        </div>
+    </section>
+
+    <section>
+        <h2>Testing</h2>
+        <div class="notice success">
+            <strong>102 tests passing</strong>
+            <span>
+                Automated coverage includes the research pipeline, dataset validation,
+                report generation, research-agent edge cases, verification, cross-app
+                analysis, and web/tool integrations.
+            </span>
+        </div>
+    </section>
+    </div>
+</main>
+<footer><div class="container">AI App Integration Research Agent · Generated from saved research artifacts</div></footer>
+</body>
+</html>

@@ -1,70 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        Multi-Agent Research Report
-    </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI App Integration Research — Case Study</title>
 
     <style>
-
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
             background: #f5f7fa;
             color: #172033;
-            font-family:
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                Roboto,
-                Helvetica,
-                Arial,
-                sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                Helvetica, Arial, sans-serif;
             line-height: 1.55;
         }
 
-        a {
-            color: inherit;
-        }
+        a { color: #2563eb; }
 
         .container {
-            width: min(
-                1400px,
-                calc(100% - 40px)
-            );
+            width: min(1400px, calc(100% - 40px));
             margin: 0 auto;
         }
 
         .hero {
-            padding: 56px 0 42px;
+            padding: 62px 0 42px;
             background: #111827;
             color: white;
         }
 
         .hero h1 {
             margin: 0;
-            font-size: 42px;
-            line-height: 1.1;
-            letter-spacing: -1px;
+            max-width: 1050px;
+            font-size: 44px;
+            line-height: 1.08;
+            letter-spacing: -1.2px;
         }
 
         .hero p {
-            max-width: 760px;
+            max-width: 900px;
             margin: 16px 0 0;
             color: #cbd5e1;
             font-size: 17px;
+        }
+
+        .hero-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 22px;
+        }
+
+        .hero-meta span {
+            padding: 6px 10px;
+            border: 1px solid #334155;
+            border-radius: 999px;
+            color: #cbd5e1;
+            font-size: 12px;
+            font-weight: 700;
         }
 
         .eyebrow {
@@ -76,50 +70,165 @@
             text-transform: uppercase;
         }
 
-        .hero .eyebrow {
-            color: #94a3b8;
-        }
+        .hero .eyebrow { color: #94a3b8; }
+
+        main { padding: 34px 0 70px; }
+        main > .container > section { margin-bottom: 40px; }
 
         .stats-grid {
             display: grid;
-            grid-template-columns:
-                repeat(5, minmax(0, 1fr));
-            gap: 16px;
-            margin-top: 32px;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 0;
+        }
+
+        .stat-card,
+        .panel,
+        .analysis-panel,
+        .distribution,
+        .application-card {
+            background: white;
+            border: 1px solid #e2e8f0;
         }
 
         .stat-card {
-            padding: 20px;
-            background: white;
-            border: 1px solid #e2e8f0;
+            padding: 18px;
             border-radius: 12px;
         }
 
         .stat-label {
             display: block;
             color: #64748b;
-            font-size: 13px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .35px;
         }
 
         .stat-value {
             display: block;
-            margin-top: 4px;
-            font-size: 30px;
-            font-weight: 750;
+            margin-top: 5px;
+            font-size: 28px;
+            font-weight: 800;
         }
 
-        .distribution {
-            margin-top: 18px;
+        .section {
+            margin-top: 42px;
+        }
+
+        .section-heading {
+            display: flex;
+            justify-content: space-between;
+            gap: 24px;
+            margin-bottom: 18px;
+        }
+
+        .section-heading h2 {
+            margin: 0;
+            font-size: 30px;
+            letter-spacing: -.5px;
+        }
+
+        .section-description {
+            max-width: 900px;
+            margin: 8px 0 0;
+            color: #64748b;
+        }
+
+        .notice {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            padding: 17px 19px;
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 12px;
+            color: #78350f;
+        }
+
+        .notice strong { flex-shrink: 0; }
+
+        .notice.success {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #166534;
+        }
+
+        .notice.danger {
+            background: #fff7f7;
+            border-color: #fecaca;
+            color: #991b1b;
+        }
+
+        .case-study-grid,
+        .two-column,
+        .analysis-grid,
+        .analysis-columns,
+        .pipeline-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .case-study-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .two-column,
+        .analysis-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .pipeline-grid {
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            align-items: stretch;
+        }
+
+        .case-card,
+        .pipeline-step {
             padding: 20px;
             background: white;
             border: 1px solid #e2e8f0;
             border-radius: 12px;
         }
 
-        .distribution h3 {
-            margin: 0 0 14px;
+        .case-card h3,
+        .pipeline-step h3 {
+            margin: 0 0 8px;
+            font-size: 16px;
         }
+
+        .case-card p,
+        .pipeline-step p {
+            margin: 0;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        .pipeline-step {
+            position: relative;
+            min-height: 145px;
+        }
+
+        .pipeline-step .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            margin-bottom: 12px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .distribution {
+            margin-top: 18px;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .distribution h3 { margin: 0 0 14px; }
 
         .distribution-list {
             display: flex;
@@ -133,27 +242,11 @@
             gap: 8px;
         }
 
-        main {
-            padding: 34px 0 70px;
-        }
-
-        main > .container > section {
-            margin-bottom: 40px;
-        }
-
         .application-card {
             margin-bottom: 28px;
             padding: 28px;
-            background: white;
-            border: 1px solid #e2e8f0;
             border-radius: 16px;
-            box-shadow:
-                0 5px 20px rgba(
-                    15,
-                    23,
-                    42,
-                    0.04
-                );
+            box-shadow: 0 5px 20px rgba(15, 23, 42, .04);
         }
 
         .application-header {
@@ -167,7 +260,7 @@
         .application-header h2 {
             margin: 0;
             font-size: 30px;
-            letter-spacing: -0.5px;
+            letter-spacing: -.5px;
         }
 
         .description {
@@ -184,8 +277,7 @@
 
         .metrics-grid {
             display: grid;
-            grid-template-columns:
-                repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 12px;
             margin: 22px 0;
         }
@@ -205,35 +297,24 @@
             font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.4px;
-        }
-
-        .two-column {
-            display: grid;
-            grid-template-columns:
-                repeat(2, minmax(0, 1fr));
-            gap: 16px;
-            margin-top: 16px;
-        }
-
-        .two-column.compact {
-            margin-top: 0;
+            letter-spacing: .4px;
         }
 
         .panel {
             margin-top: 16px;
             padding: 20px;
-            background: #fafbfc;
-            border: 1px solid #e2e8f0;
             border-radius: 12px;
+            background: #fafbfc;
         }
 
-        .panel h3 {
+        .panel h3,
+        .analysis-panel h3 {
             margin: 0 0 16px;
             font-size: 17px;
         }
 
-        .panel h4 {
+        .panel h4,
+        .analysis-panel h4 {
             margin: 0 0 8px;
             font-size: 14px;
         }
@@ -247,22 +328,11 @@
             border-bottom: 1px solid #edf2f7;
         }
 
-        .field:last-child {
-            border-bottom: 0;
-        }
+        .field:last-child { border-bottom: 0; }
+        .field > span:first-child { color: #64748b; }
+        .field strong { text-align: right; }
 
-        .field > span:first-child {
-            color: #64748b;
-        }
-
-        .field strong {
-            text-align: right;
-        }
-
-        .requirements {
-            margin-top: 15px;
-        }
-
+        .requirements { margin-top: 15px; }
         .requirements > span {
             color: #64748b;
             font-size: 13px;
@@ -274,9 +344,7 @@
             padding-left: 20px;
         }
 
-        li {
-            margin: 4px 0;
-        }
+        li { margin: 4px 0; }
 
         .badge {
             display: inline-flex;
@@ -286,29 +354,14 @@
             border-radius: 999px;
             font-size: 11px;
             font-weight: 750;
-            letter-spacing: 0.3px;
+            letter-spacing: .3px;
             text-transform: uppercase;
         }
 
-        .badge.success {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .badge.warning {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .badge.danger {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .badge.neutral {
-            background: #e2e8f0;
-            color: #475569;
-        }
+        .badge.success { background: #dcfce7; color: #166534; }
+        .badge.warning { background: #fef3c7; color: #92400e; }
+        .badge.danger { background: #fee2e2; color: #991b1b; }
+        .badge.neutral { background: #e2e8f0; color: #475569; }
 
         .source-link {
             display: inline-block;
@@ -319,18 +372,14 @@
             text-decoration: none;
         }
 
-        .source-link:hover {
-            text-decoration: underline;
-        }
+        .source-link:hover { text-decoration: underline; }
 
         .buildability-panel p {
             margin-bottom: 0;
             color: #475569;
         }
 
-        .issue-section {
-            margin-top: 18px;
-        }
+        .issue-section { margin-top: 18px; }
 
         .evidence-list {
             display: grid;
@@ -359,15 +408,8 @@
             text-transform: uppercase;
         }
 
-        .evidence-card h4 {
-            margin-bottom: 8px;
-            font-size: 15px;
-        }
-
-        .claim {
-            margin: 0;
-            font-weight: 600;
-        }
+        .evidence-card h4 { margin-bottom: 8px; font-size: 15px; }
+        .claim { margin: 0; font-weight: 600; }
 
         .snippet {
             margin: 12px 0 0;
@@ -378,53 +420,10 @@
             font-size: 13px;
         }
 
-        /* =====================================================
-           CROSS-APP ANALYSIS
-           ===================================================== */
-
-        .cross-app-section {
-            margin-top: 48px;
-        }
-
-        .section-heading {
-            display: flex;
-            justify-content: space-between;
-            gap: 24px;
-            margin-bottom: 20px;
-        }
-
-        .section-heading h2 {
-            margin: 0;
-            font-size: 30px;
-            letter-spacing: -0.5px;
-        }
-
-        .section-description {
-            max-width: 850px;
-            margin: 8px 0 0;
-            color: #64748b;
-        }
-
-        .analysis-notice {
-            display: flex;
-            gap: 14px;
-            align-items: flex-start;
-            margin-bottom: 18px;
-            padding: 16px 18px;
-            background: #fffbeb;
-            border: 1px solid #fde68a;
-            border-radius: 12px;
-            color: #78350f;
-        }
-
-        .analysis-notice strong {
-            flex-shrink: 0;
-        }
-
+        /* Cross-app analysis */
         .analysis-overview-grid {
             display: grid;
-            grid-template-columns:
-                repeat(6, minmax(0, 1fr));
+            grid-template-columns: repeat(6, minmax(0, 1fr));
             gap: 12px;
             margin-bottom: 18px;
         }
@@ -442,7 +441,7 @@
             font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.4px;
+            letter-spacing: .4px;
         }
 
         .analysis-overview-card strong {
@@ -451,39 +450,14 @@
             font-size: 25px;
         }
 
-        .analysis-grid {
-            display: grid;
-            grid-template-columns:
-                repeat(2, minmax(0, 1fr));
-            gap: 16px;
-        }
-
         .analysis-panel {
             margin-top: 16px;
             padding: 22px;
-            background: white;
-            border: 1px solid #e2e8f0;
             border-radius: 12px;
         }
 
-        .analysis-panel h3 {
-            margin: 0 0 18px;
-            font-size: 18px;
-        }
-
-        .analysis-panel h4 {
-            margin: 0 0 10px;
-            color: #64748b;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-        }
-
         .analysis-columns {
-            display: grid;
-            grid-template-columns:
-                repeat(2, minmax(0, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
         .analysis-stat-row {
@@ -494,17 +468,9 @@
             border-bottom: 1px solid #edf2f7;
         }
 
-        .analysis-stat-row:last-child {
-            border-bottom: 0;
-        }
-
-        .analysis-stat-row span {
-            color: #475569;
-        }
-
-        .analysis-stat-row strong {
-            white-space: nowrap;
-        }
+        .analysis-stat-row:last-child { border-bottom: 0; }
+        .analysis-stat-row span { color: #475569; }
+        .analysis-stat-row strong { white-space: nowrap; }
 
         .patterns-list {
             display: grid;
@@ -552,9 +518,7 @@
             font-size: 12px;
         }
 
-        .table-wrapper {
-            overflow-x: auto;
-        }
+        .table-wrapper { overflow-x: auto; }
 
         .analysis-table {
             width: 100%;
@@ -572,25 +536,28 @@
             color: #64748b;
             font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 0.4px;
+            letter-spacing: .4px;
         }
 
-        .analysis-table td {
-            font-size: 14px;
+        .analysis-table td { font-size: 14px; }
+
+        .ranking-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            font-weight: 800;
         }
 
-        /* =====================================================
-           FAILURES
-           ===================================================== */
-
-        .failures-section {
-            margin-top: 36px;
+        .score {
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
         }
 
-        .failures-section h2 {
-            margin-bottom: 16px;
-        }
-
+        /* Failures / limitations */
         .failure-card {
             margin-bottom: 10px;
             padding: 16px;
@@ -599,14 +566,8 @@
             border-radius: 10px;
         }
 
-        .failure-card strong {
-            display: block;
-        }
-
-        .failure-card span {
-            color: #64748b;
-            font-size: 12px;
-        }
+        .failure-card strong { display: block; }
+        .failure-card span { color: #64748b; font-size: 12px; }
 
         .failure-card p {
             margin-bottom: 0;
@@ -626,9 +587,25 @@
             border-radius: 16px;
         }
 
-        .muted {
-            color: #94a3b8;
+        .muted { color: #94a3b8; }
+
+        .code-block {
+            overflow-x: auto;
+            margin: 12px 0 0;
+            padding: 15px;
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 10px;
+            font: 12px/1.6 ui-monospace, SFMono-Regular, Menlo, Monaco,
+                Consolas, "Liberation Mono", monospace;
         }
+
+        .check-list {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .check-list li::marker { color: #166534; }
 
         footer {
             padding: 28px 0;
@@ -637,55 +614,29 @@
             font-size: 13px;
         }
 
-        @media (max-width: 1200px) {
-
-            .analysis-overview-grid {
-                grid-template-columns:
-                    repeat(3, minmax(0, 1fr));
-            }
-
+        @media (max-width: 1250px) {
+            .pipeline-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+            .analysis-overview-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         }
 
         @media (max-width: 1000px) {
-
-            .stats-grid {
-                grid-template-columns:
-                    repeat(3, minmax(0, 1fr));
-            }
-
-            .metrics-grid {
-                grid-template-columns:
-                    repeat(2, minmax(0, 1fr));
-            }
-
-            .analysis-grid {
-                grid-template-columns: 1fr;
-            }
-
+            .stats-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .case-study-grid,
+            .analysis-grid { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 700px) {
-
-            .container {
-                width: min(
-                    100% - 24px,
-                    1400px
-                );
-            }
-
-            .hero {
-                padding: 40px 0 30px;
-            }
-
-            .hero h1 {
-                font-size: 32px;
-            }
-
+            .container { width: min(100% - 24px, 1400px); }
+            .hero { padding: 40px 0 30px; }
+            .hero h1 { font-size: 32px; }
             .stats-grid,
             .metrics-grid,
             .two-column,
             .analysis-columns,
-            .analysis-overview-grid {
+            .analysis-overview-grid,
+            .case-study-grid,
+            .pipeline-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -693,164 +644,356 @@
                 flex-direction: column;
             }
 
-            .application-card {
-                padding: 18px;
-            }
+            .application-card { padding: 18px; }
 
             .field {
                 flex-direction: column;
                 gap: 4px;
             }
 
-            .field strong {
-                text-align: left;
-            }
+            .field strong { text-align: left; }
 
-            .analysis-notice {
-                flex-direction: column;
-            }
-
+            .notice { flex-direction: column; }
         }
-
     </style>
+
+        .site-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(17,24,39,.97);
+            border-bottom: 1px solid #334155;
+        }
+        .nav-inner {
+            width: min(1400px, calc(100% - 40px));
+            min-height: 60px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .brand {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 800;
+        }
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .nav-link {
+            color: #cbd5e1;
+            text-decoration: none;
+            padding: 7px 10px;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: 650;
+        }
+        .nav-link:hover {
+            background: #1e293b;
+            color: #fff;
+        }
+        @media (max-width:700px) {
+            .nav-inner {
+                width: calc(100% - 24px);
+                align-items: flex-start;
+                flex-direction: column;
+                padding: 10px 0;
+            }
+        }
 
 </head>
 
 <body>
 
-<header class="hero">
-
-    <div class="container">
-
-        <div class="eyebrow">
-            SKS Multi-Agent Research Assistant
+<nav class="site-nav">
+    <div class="nav-inner">
+        <a class="brand" href="pages/overview.html">AI App Research Agent</a>
+        <div class="nav-links">
+            <a class="nav-link" href="pages/overview.html">Overview</a>
+            <a class="nav-link" href="pages/cross_app_analysis.html">Cross-App Analysis</a>
+            <a class="nav-link" href="pages/applications.html">Applications</a>
+            <a class="nav-link" href="pages/execution.html">Execution & Methodology</a>
         </div>
+    </div>
+</nav>
+
+<header class="hero">
+    <div class="container">
+        <div class="eyebrow">AI Engineering Case Study</div>
 
         <h1>
-            Application Research Report
+            AI App Integration Research Agent
         </h1>
 
         <p>
-            Deterministic report generated from the
-            structured research, verification, analysis,
-            and cross-application pattern results produced
-            by the research pipeline.
+            A resumable multi-stage research pipeline that investigates
+            application APIs, authentication, access requirements, MCP
+            support, buildability, evidence quality, and cross-app patterns.
         </p>
 
+        <div class="hero-meta">
+            <span>{{REPORT_STATUS}}</span>
+            <span>{{REPORT_GENERATED_AT}}</span>
+            <span>{{DATASET_COVERAGE}}</span>
+        </div>
     </div>
-
 </header>
 
 <main>
-
     <div class="container">
 
         <section class="stats-grid">
-
             <div class="stat-card">
-
-                <span class="stat-label">
-                    Total Applications
-                </span>
-
-                <span class="stat-value">
-                    {{TOTAL_APPS}}
-                </span>
-
+                <span class="stat-label">Dataset</span>
+                <span class="stat-value">{{TOTAL_APPS}}</span>
             </div>
 
             <div class="stat-card">
-
-                <span class="stat-label">
-                    Completed
-                </span>
-
-                <span class="stat-value">
-                    {{COMPLETED_APPS}}
-                </span>
-
+                <span class="stat-label">Completed</span>
+                <span class="stat-value">{{COMPLETED_APPS}}</span>
             </div>
 
             <div class="stat-card">
-
-                <span class="stat-label">
-                    Failed
-                </span>
-
-                <span class="stat-value">
-                    {{FAILED_APPS}}
-                </span>
-
+                <span class="stat-label">Remaining</span>
+                <span class="stat-value">{{REMAINING_APPS}}</span>
             </div>
 
             <div class="stat-card">
-
-                <span class="stat-label">
-                    Verified
-                </span>
-
-                <span class="stat-value">
-                    {{VERIFIED_APPS}}
-                </span>
-
+                <span class="stat-label">Failed / Paused</span>
+                <span class="stat-value">{{FAILED_APPS}}</span>
             </div>
 
             <div class="stat-card">
-
-                <span class="stat-label">
-                    Avg. Quality
-                </span>
-
-                <span class="stat-value">
-                    {{AVERAGE_QUALITY}}
-                </span>
-
+                <span class="stat-label">Verified</span>
+                <span class="stat-value">{{VERIFIED_APPS}}</span>
             </div>
 
+            <div class="stat-card">
+                <span class="stat-label">Avg. Quality</span>
+                <span class="stat-value">{{AVERAGE_QUALITY}}</span>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-heading">
+                <div>
+                    <div class="eyebrow">Executive Summary</div>
+                    <h2>What this implementation demonstrates</h2>
+                    <p class="section-description">
+                        The system is implemented as a deterministic, checkpointed
+                        research workflow rather than a single LLM prompt. It
+                        retrieves evidence, structures findings, verifies claims,
+                        scores research quality, and aggregates the completed
+                        sample for decision-oriented comparison.
+                    </p>
+                </div>
+            </div>
+
+            <div class="notice {{EXECUTION_NOTICE_CLASS}}">
+                <strong>{{EXECUTION_NOTICE_TITLE}}</strong>
+                <span>{{EXECUTION_NOTICE_TEXT}}</span>
+            </div>
+
+            <div class="case-study-grid" style="margin-top:16px;">
+                <article class="case-card">
+                    <h3>Evidence-first research</h3>
+                    <p>
+                        Web evidence and Composio toolkit discovery are collected
+                        before structured analysis. Claims retain source URLs and
+                        snippets for inspection.
+                    </p>
+                </article>
+
+                <article class="case-card">
+                    <h3>Structured reasoning</h3>
+                    <p>
+                        Research output is validated into typed application
+                        findings covering authentication, access, API, MCP,
+                        buildability, and evidence.
+                    </p>
+                </article>
+
+                <article class="case-card">
+                    <h3>Verification + ranking</h3>
+                    <p>
+                        Deterministic verification and a documented integration
+                        priority heuristic turn raw research into comparable,
+                        reviewable results.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-heading">
+                <div>
+                    <div class="eyebrow">Architecture</div>
+                    <h2>Research workflow</h2>
+                    <p class="section-description">
+                        The pipeline is designed to survive partial failures and
+                        continue from saved checkpoints instead of restarting
+                        completed work.
+                    </p>
+                </div>
+            </div>
+
+            <div class="pipeline-grid">
+                {{PIPELINE_STEPS}}
+            </div>
         </section>
 
         <section class="distribution">
-
-            <h3>
-                Buildability Distribution
-            </h3>
-
+            <h3>Buildability Distribution</h3>
             <div class="distribution-list">
                 {{BUILDABILITY_DISTRIBUTION}}
             </div>
-
         </section>
-
-        <!-- =================================================
-             CROSS-APP ANALYSIS
-             ================================================= -->
 
         {{CROSS_APP_ANALYSIS}}
 
-        <section>
+        <section class="section">
+            <div class="section-heading">
+                <div>
+                    <div class="eyebrow">Engineering Process</div>
+                    <h2>Human involvement</h2>
+                    <p class="section-description">
+                        The agent automates repetitive research work, while the
+                        implementation still requires explicit engineering decisions,
+                        validation, failure handling, and review.
+                    </p>
+                </div>
+            </div>
 
-            <h2>
-                Applications
-            </h2>
+            <div class="case-study-grid">
+                <article class="case-card">
+                    <h3>Problem definition</h3>
+                    <p>
+                        Defined the application dataset, research schema,
+                        evidence expectations, buildability criteria, and output
+                        structure.
+                    </p>
+                </article>
+
+                <article class="case-card">
+                    <h3>Reliability engineering</h3>
+                    <p>
+                        Added retries, checkpointed progress, resumable execution,
+                        explicit quota handling, validation, deterministic
+                        verification, and regression tests.
+                    </p>
+                </article>
+
+                <article class="case-card">
+                    <h3>Quality control</h3>
+                    <p>
+                        Reviewed failed runs, corrected schema mismatches,
+                        distinguished missing verification from failed verification,
+                        and added tests for edge cases.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-heading">
+                <div>
+                    <div class="eyebrow">Reproducibility</div>
+                    <h2>How to reproduce the submission</h2>
+                </div>
+            </div>
+
+            <div class="two-column">
+                <div class="panel">
+                    <h3>Run the research pipeline</h3>
+                    <p class="muted">
+                        The pipeline can resume from previously completed results.
+                    </p>
+                    <pre class="code-block">python -m src.pipeline --limit 5</pre>
+                </div>
+
+                <div class="panel">
+                    <h3>Generate aggregate analysis</h3>
+                    <p class="muted">
+                        Cross-app analysis is deterministic and uses saved results.
+                    </p>
+                    <pre class="code-block">python -m src.cross_app_analysis
+python -m report.generate</pre>
+                </div>
+
+                <div class="panel">
+                    <h3>Run the test suite</h3>
+                    <p class="muted">
+                        The current implementation is covered by the automated
+                        regression suite.
+                    </p>
+                    <pre class="code-block">python -m pytest</pre>
+                </div>
+
+                <div class="panel">
+                    <h3>Current implementation status</h3>
+                    <ul class="check-list">
+                        <li>Dataset validation</li>
+                        <li>Evidence retrieval</li>
+                        <li>Composio toolkit discovery</li>
+                        <li>Structured Gemini analysis</li>
+                        <li>Verification and research-quality analysis</li>
+                        <li>Cross-app pattern analysis and ranking</li>
+                        <li>Deterministic HTML report generation</li>
+                        <li>Checkpointed / resumable pipeline execution</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-heading">
+                <div>
+                    <div class="eyebrow">Limitations</div>
+                    <h2>Current execution boundary</h2>
+                    <p class="section-description">
+                        The limitation below is part of the execution record and
+                        does not change the implemented workflow.
+                    </p>
+                </div>
+            </div>
+
+            <div class="notice danger">
+                <strong>Important</strong>
+                <span>
+                    {{LIMITATIONS_TEXT}}
+                </span>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-heading">
+                <div>
+                    <div class="eyebrow">Application Research</div>
+                    <h2>Per-application findings</h2>
+                    <p class="section-description">
+                        Each completed result below preserves the structured
+                        research, verification metadata, research-quality analysis,
+                        and source evidence used by the aggregate analysis.
+                    </p>
+                </div>
+            </div>
 
             {{APPLICATIONS}}
-
         </section>
 
         {{FAILURES}}
 
     </div>
-
 </main>
 
 <footer>
-
     <div class="container">
-        Generated by the SKS Multi-Agent Research Assistant.
+        Generated by the AI App Integration Research Agent.
+        Results are derived from the saved research artifacts at report generation time.
     </div>
-
 </footer>
-
 </body>
-
 </html>
