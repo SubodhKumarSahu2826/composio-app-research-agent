@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Multi-Agent Research Report
+    </title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f5f7fa;
+            color: #172033;
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Helvetica,
+                Arial,
+                sans-serif;
+            line-height: 1.55;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .container {
+            width: min(1400px, calc(100% - 40px));
+            margin: 0 auto;
+        }
+
+        .hero {
+            padding: 56px 0 42px;
+            background: #111827;
+            color: white;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 42px;
+            line-height: 1.1;
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            max-width: 760px;
+            margin: 16px 0 0;
+            color: #cbd5e1;
+            font-size: 17px;
+        }
+
+        .eyebrow {
+            margin-bottom: 8px;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .hero .eyebrow {
+            color: #94a3b8;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(5, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .stat-card {
+            padding: 20px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+        }
+
+        .stat-label {
+            display: block;
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            display: block;
+            margin-top: 4px;
+            font-size: 30px;
+            font-weight: 750;
+        }
+
+        .distribution {
+            margin-top: 18px;
+            padding: 20px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+        }
+
+        .distribution h3 {
+            margin: 0 0 14px;
+        }
+
+        .distribution-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .distribution-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        main {
+            padding: 34px 0 70px;
+        }
+
+        .application-card {
+            margin-bottom: 28px;
+            padding: 28px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow:
+                0 5px 20px rgba(
+                    15,
+                    23,
+                    42,
+                    0.04
+                );
+        }
+
+        .application-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 24px;
+            padding-bottom: 22px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .application-header h2 {
+            margin: 0;
+            font-size: 30px;
+            letter-spacing: -0.5px;
+        }
+
+        .description {
+            max-width: 900px;
+            margin: 12px 0 0;
+            color: #475569;
+        }
+
+        .application-id {
+            flex-shrink: 0;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            margin: 22px 0;
+        }
+
+        .metric {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            padding: 16px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .two-column.compact {
+            margin-top: 0;
+        }
+
+        .panel {
+            margin-top: 16px;
+            padding: 20px;
+            background: #fafbfc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+        }
+
+        .panel h3 {
+            margin: 0 0 16px;
+            font-size: 17px;
+        }
+
+        .panel h4 {
+            margin: 0 0 8px;
+            font-size: 14px;
+        }
+
+        .field {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 9px 0;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .field:last-child {
+            border-bottom: 0;
+        }
+
+        .field > span:first-child {
+            color: #64748b;
+        }
+
+        .field strong {
+            text-align: right;
+        }
+
+        .requirements {
+            margin-top: 15px;
+        }
+
+        .requirements > span {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        ul {
+            margin: 8px 0 0;
+            padding-left: 20px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            padding: 4px 9px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 750;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .badge.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge.danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge.neutral {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .source-link {
+            display: inline-block;
+            margin-top: 12px;
+            color: #2563eb;
+            font-size: 13px;
+            font-weight: 650;
+            text-decoration: none;
+        }
+
+        .source-link:hover {
+            text-decoration: underline;
+        }
+
+        .buildability-panel p {
+            margin-bottom: 0;
+            color: #475569;
+        }
+
+        .issue-section {
+            margin-top: 18px;
+        }
+
+        .evidence-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .evidence-card {
+            padding: 17px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .evidence-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .evidence-number {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .evidence-card h4 {
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .claim {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .snippet {
+            margin: 12px 0 0;
+            padding: 12px;
+            background: #f8fafc;
+            border-left: 3px solid #cbd5e1;
+            color: #475569;
+            font-size: 13px;
+        }
+
+        .failures-section {
+            margin-top: 36px;
+        }
+
+        .failures-section h2 {
+            margin-bottom: 16px;
+        }
+
+        .failure-card {
+            margin-bottom: 10px;
+            padding: 16px;
+            background: #fff7f7;
+            border: 1px solid #fecaca;
+            border-radius: 10px;
+        }
+
+        .failure-card strong {
+            display: block;
+        }
+
+        .failure-card span {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .failure-card p {
+            margin-bottom: 0;
+            color: #991b1b;
+        }
+
+        .empty-state {
+            padding: 20px;
+            color: #64748b;
+            text-align: center;
+        }
+
+        .empty-state.large {
+            padding: 60px 20px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+        }
+
+        .muted {
+            color: #94a3b8;
+        }
+
+        footer {
+            padding: 28px 0;
+            border-top: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        @media (max-width: 1000px) {
+            .stats-grid {
+                grid-template-columns:
+                    repeat(3, minmax(0, 1fr));
+            }
+
+            .metrics-grid {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 700px) {
+            .container {
+                width: min(
+                    100% - 24px,
+                    1400px
+                );
+            }
+
+            .hero {
+                padding: 40px 0 30px;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .stats-grid,
+            .metrics-grid,
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+
+            .application-header {
+                flex-direction: column;
+            }
+
+            .application-card {
+                padding: 18px;
+            }
+
+            .field {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .field strong {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="hero">
+
+    <div class="container">
+
+        <div class="eyebrow">
+            SKS Multi-Agent Research Assistant
+        </div>
+
+        <h1>
+            Application Research Report
+        </h1>
+
+        <p>
+            Deterministic report generated from the
+            structured research, verification, and
+            analysis results produced by the research
+            pipeline.
+        </p>
+
+    </div>
+
+</header>
+
+<main>
+
+    <div class="container">
+
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <span class="stat-label">
+                    Total Applications
+                </span>
+
+                <span class="stat-value">
+                    {{TOTAL_APPS}}
+                </span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">
+                    Completed
+                </span>
+
+                <span class="stat-value">
+                    {{COMPLETED_APPS}}
+                </span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">
+                    Failed
+                </span>
+
+                <span class="stat-value">
+                    {{FAILED_APPS}}
+                </span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">
+                    Verified
+                </span>
+
+                <span class="stat-value">
+                    {{VERIFIED_APPS}}
+                </span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">
+                    Avg. Quality
+                </span>
+
+                <span class="stat-value">
+                    {{AVERAGE_QUALITY}}
+                </span>
+            </div>
+
+        </section>
+
+        <section class="distribution">
+
+            <h3>
+                Buildability Distribution
+            </h3>
+
+            <div class="distribution-list">
+                {{BUILDABILITY_DISTRIBUTION}}
+            </div>
+
+        </section>
+
+        <section>
+
+            <h2>
+                Applications
+            </h2>
+
+            {{APPLICATIONS}}
+
+        </section>
+
+        {{FAILURES}}
+
+    </div>
+
+</main>
+
+<footer>
+
+    <div class="container">
+        Generated by the SKS Multi-Agent Research Assistant.
+    </div>
+
+</footer>
+
+</body>
+</html>

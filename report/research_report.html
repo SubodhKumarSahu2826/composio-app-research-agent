@@ -1,0 +1,2171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Multi-Agent Research Report
+    </title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f5f7fa;
+            color: #172033;
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Helvetica,
+                Arial,
+                sans-serif;
+            line-height: 1.55;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .container {
+            width: min(1400px, calc(100% - 40px));
+            margin: 0 auto;
+        }
+
+        .hero {
+            padding: 56px 0 42px;
+            background: #111827;
+            color: white;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 42px;
+            line-height: 1.1;
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            max-width: 760px;
+            margin: 16px 0 0;
+            color: #cbd5e1;
+            font-size: 17px;
+        }
+
+        .eyebrow {
+            margin-bottom: 8px;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .hero .eyebrow {
+            color: #94a3b8;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(5, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .stat-card {
+            padding: 20px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+        }
+
+        .stat-label {
+            display: block;
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            display: block;
+            margin-top: 4px;
+            font-size: 30px;
+            font-weight: 750;
+        }
+
+        .distribution {
+            margin-top: 18px;
+            padding: 20px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+        }
+
+        .distribution h3 {
+            margin: 0 0 14px;
+        }
+
+        .distribution-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .distribution-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        main {
+            padding: 34px 0 70px;
+        }
+
+        .application-card {
+            margin-bottom: 28px;
+            padding: 28px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow:
+                0 5px 20px rgba(
+                    15,
+                    23,
+                    42,
+                    0.04
+                );
+        }
+
+        .application-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 24px;
+            padding-bottom: 22px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .application-header h2 {
+            margin: 0;
+            font-size: 30px;
+            letter-spacing: -0.5px;
+        }
+
+        .description {
+            max-width: 900px;
+            margin: 12px 0 0;
+            color: #475569;
+        }
+
+        .application-id {
+            flex-shrink: 0;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            margin: 22px 0;
+        }
+
+        .metric {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            padding: 16px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .two-column.compact {
+            margin-top: 0;
+        }
+
+        .panel {
+            margin-top: 16px;
+            padding: 20px;
+            background: #fafbfc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+        }
+
+        .panel h3 {
+            margin: 0 0 16px;
+            font-size: 17px;
+        }
+
+        .panel h4 {
+            margin: 0 0 8px;
+            font-size: 14px;
+        }
+
+        .field {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 9px 0;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .field:last-child {
+            border-bottom: 0;
+        }
+
+        .field > span:first-child {
+            color: #64748b;
+        }
+
+        .field strong {
+            text-align: right;
+        }
+
+        .requirements {
+            margin-top: 15px;
+        }
+
+        .requirements > span {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        ul {
+            margin: 8px 0 0;
+            padding-left: 20px;
+        }
+
+        li {
+            margin: 4px 0;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            padding: 4px 9px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 750;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .badge.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge.danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge.neutral {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .source-link {
+            display: inline-block;
+            margin-top: 12px;
+            color: #2563eb;
+            font-size: 13px;
+            font-weight: 650;
+            text-decoration: none;
+        }
+
+        .source-link:hover {
+            text-decoration: underline;
+        }
+
+        .buildability-panel p {
+            margin-bottom: 0;
+            color: #475569;
+        }
+
+        .issue-section {
+            margin-top: 18px;
+        }
+
+        .evidence-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .evidence-card {
+            padding: 17px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .evidence-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .evidence-number {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .evidence-card h4 {
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .claim {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .snippet {
+            margin: 12px 0 0;
+            padding: 12px;
+            background: #f8fafc;
+            border-left: 3px solid #cbd5e1;
+            color: #475569;
+            font-size: 13px;
+        }
+
+        .failures-section {
+            margin-top: 36px;
+        }
+
+        .failures-section h2 {
+            margin-bottom: 16px;
+        }
+
+        .failure-card {
+            margin-bottom: 10px;
+            padding: 16px;
+            background: #fff7f7;
+            border: 1px solid #fecaca;
+            border-radius: 10px;
+        }
+
+        .failure-card strong {
+            display: block;
+        }
+
+        .failure-card span {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .failure-card p {
+            margin-bottom: 0;
+            color: #991b1b;
+        }
+
+        .empty-state {
+            padding: 20px;
+            color: #64748b;
+            text-align: center;
+        }
+
+        .empty-state.large {
+            padding: 60px 20px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+        }
+
+        .muted {
+            color: #94a3b8;
+        }
+
+        footer {
+            padding: 28px 0;
+            border-top: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        @media (max-width: 1000px) {
+            .stats-grid {
+                grid-template-columns:
+                    repeat(3, minmax(0, 1fr));
+            }
+
+            .metrics-grid {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 700px) {
+            .container {
+                width: min(
+                    100% - 24px,
+                    1400px
+                );
+            }
+
+            .hero {
+                padding: 40px 0 30px;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .stats-grid,
+            .metrics-grid,
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+
+            .application-header {
+                flex-direction: column;
+            }
+
+            .application-card {
+                padding: 18px;
+            }
+
+            .field {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .field strong {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="hero">
+
+    <div class="container">
+
+        <div class="eyebrow">
+            SKS Multi-Agent Research Assistant
+        </div>
+
+        <h1>
+            Application Research Report
+        </h1>
+
+        <p>
+            Deterministic report generated from the
+            structured research, verification, and
+            analysis results produced by the research
+            pipeline.
+        </p>
+
+    </div>
+
+</header>
+
+<main>
+
+    <div class="container">
+
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <span class="stat-label">
+                    Total Applications
+                </span>
+
+                <span class="stat-value">
+                    3
+                </span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">
+                    Completed
+                </span>
+
+                <span class="stat-value">
+                    3
+                </span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">
+                    Failed
+                </span>
+
+                <span class="stat-value">
+                    0
+                </span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">
+                    Verified
+                </span>
+
+                <span class="stat-value">
+                    1
+                </span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">
+                    Avg. Quality
+                </span>
+
+                <span class="stat-value">
+                    88.1
+                </span>
+            </div>
+
+        </section>
+
+        <section class="distribution">
+
+            <h3>
+                Buildability Distribution
+            </h3>
+
+            <div class="distribution-list">
+                
+            <span class="distribution-item">
+                <span class="badge success">
+                    Easy
+                </span>
+                <strong>1</strong>
+            </span>
+            
+            <span class="distribution-item">
+                <span class="badge warning">
+                    Possible
+                </span>
+                <strong>2</strong>
+            </span>
+            
+            </div>
+
+        </section>
+
+        <section>
+
+            <h2>
+                Applications
+            </h2>
+
+            
+    <section class="application-card">
+
+        <div class="application-header">
+            <div>
+                <div class="eyebrow">
+                    CRM and Sales
+                </div>
+
+                <h2>
+                    Salesforce
+                </h2>
+
+                <p class="description">
+                    Salesforce is a leading CRM platform that provides various APIs, including REST, for programmatic access to integrate data, perform complex operations, and manage application metadata. It also offers Salesforce Hosted MCP Servers for secure AI agent interoperability.
+                </p>
+            </div>
+
+            <div class="application-id">
+                App ID:
+                1
+            </div>
+        </div>
+
+        <div class="metrics-grid">
+
+            <div class="metric">
+                <span class="metric-label">
+                    Buildability
+                </span>
+
+                <span class="badge warning">
+                    Possible
+                </span>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">
+                    Verification
+                </span>
+
+                <span class="badge neutral">
+                    N/A
+                </span>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">
+                    Quality Score
+                </span>
+
+                <strong>
+                    N/A
+                </strong>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">
+                    Evidence
+                </span>
+
+                <strong>
+                    7
+                </strong>
+            </div>
+
+        </div>
+
+        <div class="two-column">
+
+            <div class="panel">
+                <h3>Authentication</h3>
+
+                <div class="field">
+                    <span>Methods</span>
+                    <strong>
+                        OAuth2
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>
+                        95%
+                    </strong>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Access</h3>
+
+                <div class="field">
+                    <span>Type</span>
+                    <strong>
+                        Paid Plan Required
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>
+                        85%
+                    </strong>
+                </div>
+
+                <div class="requirements">
+                    <span>Requirements</span>
+                    <ul><li>Admin Approval Required</li></ul>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="two-column">
+
+            <div class="panel">
+                <h3>API</h3>
+
+                <div class="field">
+                    <span>Type</span>
+                    <strong>
+                        REST
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Breadth</span>
+                    <strong>
+                        Broad
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>
+                        95%
+                    </strong>
+                </div>
+
+                
+                    <a
+                        class="source-link"
+                        href="https://developer.salesforce.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        API documentation
+                    </a>
+                    
+
+            </div>
+
+            <div class="panel">
+                <h3>MCP</h3>
+
+                <div class="field">
+                    <span>Status</span>
+                    <span class="badge success">
+                        Official MCP
+                    </span>
+                </div>
+
+                <div class="field">
+                    <span>Official</span>
+                    <strong>
+                        Yes
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>
+                        100%
+                    </strong>
+                </div>
+
+                
+                    <a
+                        class="source-link"
+                        href="https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/hosted-mcp-servers-overview.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        MCP documentation
+                    </a>
+                    
+
+            </div>
+
+        </div>
+
+        <div class="panel buildability-panel">
+
+            <h3>Buildability Assessment</h3>
+
+            
+
+            <p>
+                Building an integration is technically feasible with public REST APIs and OAuth2 authentication. However, it requires an existing Salesforce organization, potentially a paid plan, and administrative approval/setup for API access and configuration of features like external client apps or MCP servers. A &#x27;Developer Org&#x27; might allow initial experimentation.
+            </p>
+
+        </div>
+
+        <div class="panel">
+
+            <h3>Verification</h3>
+
+            <div class="field">
+                <span>Score</span>
+                <strong>
+                    N/A
+                </strong>
+            </div>
+
+            <p class="muted">No verification errors.</p>
+
+            <p class="muted">No verification warnings.</p>
+
+        </div>
+
+        <div class="panel">
+
+            <h3>Research Quality</h3>
+
+            <div class="two-column compact">
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>
+                        Unknown
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Evidence Coverage</span>
+                    <strong>
+                        Unknown
+                    </strong>
+                </div>
+
+            </div>
+
+            
+
+            
+
+        </div>
+
+        <div class="panel">
+
+            <h3>Evidence</h3>
+
+            <div class="evidence-list">
+                
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 1
+                    </span>
+
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Authentication - Account Engagement API - Salesforce Developers</h4>
+
+                <p class="claim">
+                    Salesforce&#x27;s Account Engagement API supports authentication via OAuth 2.0 flows, requiring an access token obtained from the Salesforce OAuth Endpoint.
+                </p>
+
+                
+                    <p class="snippet">
+                        There are numerous OAuth 2.0 Flow types supported. The Web Server Flow is the most commonly used. For a list of all flows, see the OAuth 2.0 Flows Help page. Read the descriptions of the flows to choose the best one for your case.
+
+After you get the access token, you must pass it and the Account Engagement Business Unit ID using the `Authorization` and `Pardot-Business-Unit-Id` headers.
+                    </p>
+                    
+
+                
+                    <a
+                        class="source-link"
+                        href="https://developer.salesforce.com/docs/marketing/pardot/guide/authentication.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open source
+                    </a>
+                    
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 2
+                    </span>
+
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>OAuth and Connect REST API - Salesforce Developers</h4>
+
+                <p class="claim">
+                    The Connect REST API uses OAuth for application identification and requires setting up an external client app and authorization within a Salesforce organization.
+                </p>
+
+                
+                    <p class="snippet">
+                        Connect REST API uses OAuth to securely identify your application before connecting to Salesforce. To use Connect REST API, create a REST entry point in your org. Salesforce defines this entry point as an external client app. See Step Two: Set Up Authorization to create your external client app.
+                    </p>
+                    
+
+                
+                    <a
+                        class="source-link"
+                        href="https://developer.salesforce.com/docs/platform/connect-rest-api/guide/intro_using_oauth.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open source
+                    </a>
+                    
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 3
+                    </span>
+
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Salesforce Developers: Developer Portal</h4>
+
+                <p class="claim">
+                    Salesforce provides various APIs, including Salesforce REST API, B2C Commerce API, Marketing Cloud APIs (REST and SOAP), and Metadata API.
+                </p>
+
+                
+                    <p class="snippet">
+                        ## Discover Salesforce APIs and put them to work.
+
+### Salesforce REST API
+
+Integrate Salesforce data into apps and perform complex operations on a large scale.
+
+### B2C Commerce API
+
+Ensure omnichannel flexibility by using a headless API to build custom apps, from full storefronts to merchant tools.
+
+### Marketing Cloud APIs
+
+Create your ideal integration with the Marketing Cloud REST and SOAP APIs.
+
+### Metadata API
+
+Customize, deploy, package, and upgrade application metadata.
+                    </p>
+                    
+
+                
+                    <a
+                        class="source-link"
+                        href="https://developer.salesforce.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open source
+                    </a>
+                    
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 4
+                    </span>
+
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Get Started | Hosted MCP Servers - Salesforce Developers</h4>
+
+                <p class="claim">
+                    Salesforce offers &#x27;Hosted MCP Servers&#x27; that use the open Model Context Protocol (MCP) standard for secure agentic interoperability with AI clients, utilizing OAuth-based authentication.
+                </p>
+
+                
+                    <p class="snippet">
+                        Salesforce Hosted MCP Servers give AI agents a secure, governed way to interact with Salesforce data and automation. Using the open Model Context Protocol (MCP) standard, any compatible AI client—Claude, ChatGPT, Cursor, or a custom agent—can connect to a Salesforce org and act on behalf of authorized users.
+
+Think of it as a universal connector: instead of building custom API integrations for each AI tool your team uses, you configure a server once in Salesforce, and any MCP-compatible client can connect to it by using standard OAuth-based authentication.
+                    </p>
+                    
+
+                
+                    <a
+                        class="source-link"
+                        href="https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/hosted-mcp-servers-overview.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open source
+                    </a>
+                    
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 5
+                    </span>
+
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>REST API Developer Guide - SalesforceHow to Authenticate Salesforce REST APIs from Within ...Salesforce REST API: A Step-by-Step Guide- Updated 2026Connect REST API Developer Guide - SalesforceAuthentication in Salesforce: A Comprehensive Guide - LinkedIn</h4>
+
+                <p class="claim">
+                    The Lightning Platform REST API provides programmatic access to Salesforce data, allowing for creating, manipulating, and searching data using HTTP requests and a RESTful architecture.
+                </p>
+
+                
+                    <p class="snippet">
+                        REST API provides you with programmatic access to your data in Salesforce. The flexibility and scalability of REST API make it an excellent choice for integrating Salesforce into your applications and for performing complex operations on a large scale. You can use REST API tools to create, manipulate, and search data in Salesforce by sending HTTP requests to endpoints in Salesforce. Depending on where you send requests, you access and operate on different pieces of information, called resources. Resources include records, query results, metadata, and more. REST API uses RESTful architecture to provide a straightforward and consistent interface.
+                    </p>
+                    
+
+                
+                    <a
+                        class="source-link"
+                        href="https://resources.docs.salesforce.com/latest/latest/en-us/sfdc/pdf/api_rest.pdf"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open source
+                    </a>
+                    
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 6
+                    </span>
+
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Agentforce MCP Support - Salesforce</h4>
+
+                <p class="claim">
+                    Salesforce&#x27;s Agentforce supports Model Context Protocol (MCP) as an open standard for AI agents to connect with external tools, systems, and data, enhancing enterprise interoperability.
+                </p>
+
+                
+                    <p class="snippet">
+                        Agentforce will provide secure, enterprise-grade agentic interoperability by leveraging Model Context Protocol (MCP). Connect your agents across systems, unlock and unify data, and drive trusted, differentiated customer experiences. It will be the trusted bridge for orchestrating digital labor across your entire business ecosystem.
+                    </p>
+                    
+
+                
+                    <a
+                        class="source-link"
+                        href="https://www.salesforce.com/agentforce/mcp-support"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open source
+                    </a>
+                    
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 7
+                    </span>
+
+                    <span class="badge neutral">
+                        third_party
+                    </span>
+                </div>
+
+                <h4>Exploring the Salesforce Rest API</h4>
+
+                <p class="claim">
+                    The Salesforce REST API offers extensive capabilities for external systems or apps to access Salesforce data and metadata, handle bulk requests, and scale effectively.
+                </p>
+
+                
+                    <p class="snippet">
+                        The above is just a drop in the ocean as to what the Salesforce REST API can achieve; if you have an external system or app that you wish to be able to access Salesforce data, or to be dynamically driven from Salesforce’s metadata, the REST API is there to help you out. With its consistent formatting and plethora of documentation, you can really extend the benefits of your Salesforce org far outside of it.
+
+Additionally, it has a great ability to scale and handle bulk requests, so the only real limitation is your imagination and willingness to experiment.
+                    </p>
+                    
+
+                
+                    <a
+                        class="source-link"
+                        href="https://www.salesforceben.com/exploring-the-salesforce-rest-api"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open source
+                    </a>
+                    
+            </article>
+            
+            </div>
+
+        </div>
+
+    </section>
+    
+
+    <section class="application-card">
+
+        <div class="application-header">
+            <div>
+                <div class="eyebrow">
+                    CRM and Sales
+                </div>
+
+                <h2>
+                    HubSpot
+                </h2>
+
+                <p class="description">
+                    HubSpot is an inbound marketing, sales, and customer service platform that integrates CRM, email automation, and analytics to facilitate lead nurturing and seamless customer experiences, functioning as a robust CRM and marketing automation platform.
+                </p>
+            </div>
+
+            <div class="application-id">
+                App ID:
+                2
+            </div>
+        </div>
+
+        <div class="metrics-grid">
+
+            <div class="metric">
+                <span class="metric-label">
+                    Buildability
+                </span>
+
+                <span class="badge warning">
+                    Possible
+                </span>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">
+                    Verification
+                </span>
+
+                <span class="badge neutral">
+                    N/A
+                </span>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">
+                    Quality Score
+                </span>
+
+                <strong>
+                    N/A
+                </strong>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">
+                    Evidence
+                </span>
+
+                <strong>
+                    7
+                </strong>
+            </div>
+
+        </div>
+
+        <div class="two-column">
+
+            <div class="panel">
+                <h3>Authentication</h3>
+
+                <div class="field">
+                    <span>Methods</span>
+                    <strong>
+                        OAuth2, API Key
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>
+                        95%
+                    </strong>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Access</h3>
+
+                <div class="field">
+                    <span>Type</span>
+                    <strong>
+                        Self-serve / Free
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>
+                        95%
+                    </strong>
+                </div>
+
+                <div class="requirements">
+                    <span>Requirements</span>
+                    <ul><li>Developer Account</li><li>App Registration</li><li>Scope Configuration</li></ul>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="two-column">
+
+            <div class="panel">
+                <h3>API</h3>
+
+                <div class="field">
+                    <span>Type</span>
+                    <strong>
+                        REST
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Breadth</span>
+                    <strong>
+                        Broad
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>
+                        95%
+                    </strong>
+                </div>
+
+                
+                    <a
+                        class="source-link"
+                        href="https://developers.hubspot.com/docs/api-reference/latest/crm/understanding-the-crm"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        API documentation
+                    </a>
+                    
+
+            </div>
+
+            <div class="panel">
+                <h3>MCP</h3>
+
+                <div class="field">
+                    <span>Status</span>
+                    <span class="badge success">
+                        Official MCP
+                    </span>
+                </div>
+
+                <div class="field">
+                    <span>Official</span>
+                    <strong>
+                        Yes
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>
+                        80%
+                    </strong>
+                </div>
+
+                
+
+            </div>
+
+        </div>
+
+        <div class="panel buildability-panel">
+
+            <h3>Buildability Assessment</h3>
+
+            
+
+            <p>
+                A free developer account and app registration are required for API access. While technically feasible, the OAuth 2.0 implementation may have specific quirks that require additional effort and understanding from developers, moving it from &#x27;Easy&#x27; to &#x27;Possible&#x27;.
+            </p>
+
+        </div>
+
+        <div class="panel">
+
+            <h3>Verification</h3>
+
+            <div class="field">
+                <span>Score</span>
+                <strong>
+                    N/A
+                </strong>
+            </div>
+
+            <p class="muted">No verification errors.</p>
+
+            <p class="muted">No verification warnings.</p>
+
+        </div>
+
+        <div class="panel">
+
+            <h3>Research Quality</h3>
+
+            <div class="two-column compact">
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>
+                        Unknown
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Evidence Coverage</span>
+                    <strong>
+                        Unknown
+                    </strong>
+                </div>
+
+            </div>
+
+            
+
+            
+
+        </div>
+
+        <div class="panel">
+
+            <h3>Evidence</h3>
+
+            <div class="evidence-list">
+                
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 1
+                    </span>
+
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>HubSpot APIs | Authentication methods on HubSpot</h4>
+
+                <p class="claim">
+                    HubSpot&#x27;s APIs support authentication using OAuth and private app access tokens, in addition to other key types like Developer API keys and Personal Access Keys.
+                </p>
+
+                
+                    <p class="snippet">
+                        There are two ways to authenticate calls to HubSpot’s APIs: OAuth, and private app access tokens. Below, learn more about each method and how to include it in your code for authorization. [...] The affected key and token types are listed below:
+
+ Developer API keys created within your app developer account.
+ Personal Access Keys used to authenticate commands in the HubSpot CLI.
+ Private access tokens used to authenticate requests in a private app.
+ SMTP tokens used for sending transactional emails.
+                    </p>
+                    
+
+                
+                    <a
+                        class="source-link"
+                        href="https://developers.hubspot.com/docs/apps/legacy-apps/authentication/intro-to-auth"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open source
+                    </a>
+                    
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 2
+                    </span>
+
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Authentication overview - HubSpot docs</h4>
+
+                <p class="claim">
+                    OAuth authentication is required for distributing apps to multiple accounts, including through the HubSpot Marketplace, and Developer API keys are also available for certain features.
+                </p>
+
+                
+                    <p class="snippet">
+                        If you plan to distribute your app to multiple accounts (either through listing on the HubSpot Marketplace or by managing specific authorized accounts), your app must be built using OAuth authentication. [...] Some app features and settings require a developer API key, which is available in the developer overview of your HubSpot account.
+                    </p>
+                    
+
+                
+                    <a
+                        class="source-link"
+                        href="https://developers.hubspot.com/docs/apps/developer-platform/build-apps/authentication/overview"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open source
+                    </a>
+                    
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 3
+                    </span>
+
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Understanding the CRM APIs - HubSpot docs</h4>
+
+                <p class="claim">
+                    The HubSpot CRM API provides access to a broad range of objects, including Appointments, Calls, Companies, Contacts, Deals, Line Items, Marketing events, and Tickets.
+                </p>
+
+                
+                    <p class="snippet">
+                        | Object | Type ID | Description |
+ --- 
+| Appointments | `0-421` | Represent encounters or services scheduled for an individual. View the appointments API |
+| Calls | `0-48` | A type of activity that represents phone call interactions associated with your records. View the calls API |
+| Companies | `0-2` | Stores information about a business or organization. View the companies API |
+| Contacts | `0-1` | Stores information about an individual person. View the contacts API | [...] | Line Items | `0-6` | Represent physical goods or services that are included in a quote or deal. View the line items API |
+| Marketing events | `0-54` | Represent events related to your marketing efforts, specifically including events from connected integrations. View the marketing events API |
+| Tickets | `0-5` | Represent customer requests for help or support, tracked through pipeline statuses. View the tickets API |
+                    </p>
+                    
+
+                
+                    <a
+                        class="source-link"
+                        href="https://developers.hubspot.com/docs/api-reference/latest/crm/understanding-the-crm"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open source
+                    </a>
+                    
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 4
+                    </span>
+
+                    <span class="badge neutral">
+                        third_party
+                    </span>
+                </div>
+
+                <h4>Using the Hubspot API to Create or Update Companies ...</h4>
+
+                <p class="claim">
+                    Developers can sign up for a free HubSpot developer account, create a test account, and set up a private app to authenticate API requests using OAuth, requiring scope configuration.
+                </p>
+
+                
+                    <p class="snippet">
+                        Before you can start creating or updating companies using the HubSpot API, you&#x27;ll need to set up a developer account and create a private app. [...] Visit the HubSpot Developer Portal and sign up for a free developer account. [...] create a test account to experiment with the API without affecting live data. [...] In your HubSpot account, navigate to Settings &gt; Integrations &gt; Private Apps. [...] Under the Scopes section, ensure you select the appropriate scopes for managing companies.
+                    </p>
+                    
+
+                
+                    <a
+                        class="source-link"
+                        href="https://endgrate.com/blog/using-the-hubspot-api-to-create-or-update-companies-(with-javascript-examples)"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open source
+                    </a>
+                    
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 5
+                    </span>
+
+                    <span class="badge neutral">
+                        third_party
+                    </span>
+                </div>
+
+                <h4>How to Set Up HubSpot API Integration: A Quick Starter Guide - Coefficient</h4>
+
+                <p class="claim">
+                    HubSpot provides a free developer account with sandbox data and states that API keys are deprecated for new public apps, emphasizing OAuth 2.0.
+                </p>
+
+                
+                    <p class="snippet">
+                        Start simple. Create a free HubSpot developer account. This gives you sandbox data without risking real customer information. [...] The developer account mirrors production functionality. Perfect for testing your integration logic. [...] OAuth 2.0 Knowledge: Understanding of OAuth flows (API keys are deprecated for new public apps).
+                    </p>
+                    
+
+                
+                    <a
+                        class="source-link"
+                        href="https://coefficient.io/hubspot-api/setup-hubspot-api-integration"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open source
+                    </a>
+                    
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 6
+                    </span>
+
+                    <span class="badge neutral">
+                        third_party
+                    </span>
+                </div>
+
+                <h4>Navigating HubSpot&#x27;s Sunsetting API Keys</h4>
+
+                <p class="claim">
+                    HubSpot is transitioning from API keys to OAuth 2.0 for API authentication to enhance security.
+                </p>
+
+                
+                    <p class="snippet">
+                        HubSpot’s move to sunset API keys means developers must transition to OAuth 2.0 for API authentication. This change enhances security by providing a more secure and flexible method for managing API access.
+                    </p>
+                    
+
+                
+                    <a
+                        class="source-link"
+                        href="https://growthnatives.com/blogs/hubspot/hubspot-sunsets-api-keys"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open source
+                    </a>
+                    
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 7
+                    </span>
+
+                    <span class="badge neutral">
+                        third_party
+                    </span>
+                </div>
+
+                <h4>How to Connect with the HubSpot API</h4>
+
+                <p class="claim">
+                    HubSpot&#x27;s API uses REST endpoints with JSON payloads and OAuth 2.0, often utilizing Bearer tokens for authorization, though its OAuth implementation can have specific quirks.
+                </p>
+
+                
+                    <p class="snippet">
+                        HubSpot&#x27;s API looks modern on the surface. REST endpoints, JSON payloads, OAuth 2.0, webhooks. [...] &#x27;Authorization&#x27;: `Bearer ${accessToken}` [...] HubSpot uses OAuth 2.0, which sounds standard until you realize their implementation has its own special flavor. You need three things before you even start: a developer account (separate from your regular HubSpot account), an app registration, and the patience of a saint.
+                    </p>
+                    
+
+                
+                    <a
+                        class="source-link"
+                        href="https://www.apideck.com/blog/how-to-connect-with-the-hubspot-api"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open source
+                    </a>
+                    
+            </article>
+            
+            </div>
+
+        </div>
+
+    </section>
+    
+
+    <section class="application-card">
+
+        <div class="application-header">
+            <div>
+                <div class="eyebrow">
+                    CRM and Sales
+                </div>
+
+                <h2>
+                    Pipedrive
+                </h2>
+
+                <p class="description">
+                    Pipedrive is a sales CRM platform featuring pipeline management, deal tracking, automation, a comprehensive REST API, and an official Model Context Protocol (MCP) integration.
+                </p>
+            </div>
+
+            <div class="application-id">
+                App ID:
+                3
+            </div>
+        </div>
+
+        <div class="metrics-grid">
+
+            <div class="metric">
+                <span class="metric-label">
+                    Buildability
+                </span>
+
+                <span class="badge success">
+                    Easy
+                </span>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">
+                    Verification
+                </span>
+
+                <span class="badge success">
+                    PASSED
+                </span>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">
+                    Quality Score
+                </span>
+
+                <strong>
+                    88.1/100
+                </strong>
+            </div>
+
+            <div class="metric">
+                <span class="metric-label">
+                    Evidence
+                </span>
+
+                <strong>
+                    5
+                </strong>
+            </div>
+
+        </div>
+
+        <div class="two-column">
+
+            <div class="panel">
+                <h3>Authentication</h3>
+
+                <div class="field">
+                    <span>Methods</span>
+                    <strong>
+                        OAuth2, API Key, Bearer Token
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>
+                        92%
+                    </strong>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Access</h3>
+
+                <div class="field">
+                    <span>Type</span>
+                    <strong>
+                        Self-serve / Trial
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>
+                        88%
+                    </strong>
+                </div>
+
+                <div class="requirements">
+                    <span>Requirements</span>
+                    <ul><li>14-day free trial available without credit card</li><li>Free developer sandbox account available indefinitely for testing</li><li>Paid plan required for production API access</li></ul>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="two-column">
+
+            <div class="panel">
+                <h3>API</h3>
+
+                <div class="field">
+                    <span>Type</span>
+                    <strong>
+                        REST
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Breadth</span>
+                    <strong>
+                        Broad
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>
+                        92%
+                    </strong>
+                </div>
+
+                
+                    <a
+                        class="source-link"
+                        href="https://developers.pipedrive.com/docs/api/v1"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        API documentation
+                    </a>
+                    
+
+            </div>
+
+            <div class="panel">
+                <h3>MCP</h3>
+
+                <div class="field">
+                    <span>Status</span>
+                    <span class="badge success">
+                        Official MCP
+                    </span>
+                </div>
+
+                <div class="field">
+                    <span>Official</span>
+                    <strong>
+                        Yes
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>
+                        95%
+                    </strong>
+                </div>
+
+                
+                    <a
+                        class="source-link"
+                        href="https://www.pipedrive.com/en/features/mcp-server"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        MCP documentation
+                    </a>
+                    
+
+            </div>
+
+        </div>
+
+        <div class="panel buildability-panel">
+
+            <h3>Buildability Assessment</h3>
+
+            
+
+            <p>
+                Pipedrive offers a fully documented REST API with OAuth2 and API key authentication, a free developer sandbox, and an officially maintained vendor MCP server.
+            </p>
+
+        </div>
+
+        <div class="panel">
+
+            <h3>Verification</h3>
+
+            <div class="field">
+                <span>Score</span>
+                <strong>
+                    1.00
+                </strong>
+            </div>
+
+            <p class="muted">No verification errors.</p>
+
+            <p class="muted">No verification warnings.</p>
+
+        </div>
+
+        <div class="panel">
+
+            <h3>Research Quality</h3>
+
+            <div class="two-column compact">
+
+                <div class="field">
+                    <span>Confidence</span>
+                    <strong>
+                        High
+                    </strong>
+                </div>
+
+                <div class="field">
+                    <span>Evidence Coverage</span>
+                    <strong>
+                        High
+                    </strong>
+                </div>
+
+            </div>
+
+            
+                <div class="issue-section">
+                    <h4>Strengths</h4>
+                    <ul><li>Research contains multiple evidence sources.</li><li>Authentication method is identified.</li><li>A public API surface was identified.</li><li>Official MCP support is explicitly identified.</li></ul>
+                </div>
+                
+
+            
+                <div class="issue-section">
+                    <h4>Warnings</h4>
+                    <ul><li>Limited official-source coverage.</li></ul>
+                </div>
+                
+
+        </div>
+
+        <div class="panel">
+
+            <h3>Evidence</h3>
+
+            <div class="evidence-list">
+                
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 1
+                    </span>
+
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Pipedrive API Reference and Documentation</h4>
+
+                <p class="claim">
+                    Pipedrive provides a RESTful API covering the majority of core product functionality, validated against API tokens, and offers free developer sandbox accounts.
+                </p>
+
+                
+                    <p class="snippet">
+                        API Reference
+
+###### API Reference
+
+###### Endpoints
+
+## API Reference
+
+This reference helps you implement the RESTful Pipedrive API. This API uses a JSON format for output and is capable of handling CORS (Cross-Origin Resource Sharing) requests. The API is stateless – all requests are validated against an API token. The API token can be obtained manually from the Pipedrive app.
+
+#### OpenAPI 3 [...] Notice!
+
+Pipedrive&#x27;s API and extension points cover the majority of our core product&#x27;s function
+                    </p>
+                    
+
+                
+                    <a
+                        class="source-link"
+                        href="https://developers.pipedrive.com/docs/api/v1"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open source
+                    </a>
+                    
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 2
+                    </span>
+
+                    <span class="badge neutral">
+                        official_docs
+                    </span>
+                </div>
+
+                <h4>Connect your AI assistant to Pipedrive with MCP</h4>
+
+                <p class="claim">
+                    Pipedrive offers an official Model Context Protocol (MCP) server built and maintained by Pipedrive that supports OAuth login across all plans.
+                </p>
+
+                
+                    <p class="snippet">
+                        Pipedrive MCP (Model Context Protocol) connects your AI assistant directly to Pipedrive, allowing it to securely access, update and act on your CRM data using natural language.
+ You can query CRM data, update records and automate workflows directly from your AI assistant. Find deals, update contacts, create activities, analyze pipelines and automate repetitive tasks using natural “plain” language.
+ All Pipedrive customers, on every plan. Usage is subject to token limits based on your plan and yo
+                    </p>
+                    
+
+                
+                    <a
+                        class="source-link"
+                        href="https://www.pipedrive.com/en/features/mcp-server"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open source
+                    </a>
+                    
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 3
+                    </span>
+
+                    <span class="badge neutral">
+                        third_party
+                    </span>
+                </div>
+
+                <h4>Authentication - ReadMe</h4>
+
+                <p class="claim">
+                    Pipedrive API supports authentication via OAuth 2.0 as well as API tokens sent in the x-api-token header.
+                </p>
+
+                
+                    <p class="snippet">
+                        For AI agents: visit  for an index of all pages formatted in Markdown and endpoints in OpenAPI.
+
+Jump to Content
+
+Pipedrive Developer Documentation
+
+Pipedrive Developer Documentation
+
+API ReferenceTutorialsChangelogDev CommunityBlogPipedrive Developer Documentation
+
+Pipedrive Developer Documentation
+
+API ReferenceTutorialsChangelogDev CommunityBlog
+
+# Authentication
+
+&gt; 📘
+&gt;
+&gt; All requests to our API need authentication.
+
+## If you&#x27;re creating an app
+
+Continue to OAuth 2.0 overview.  
+ You can fin
+                    </p>
+                    
+
+                
+                    <a
+                        class="source-link"
+                        href="https://pipedrive.readme.io/docs/core-api-concepts-authentication"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open source
+                    </a>
+                    
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 4
+                    </span>
+
+                    <span class="badge neutral">
+                        third_party
+                    </span>
+                </div>
+
+                <h4>OAuth 2.0 overview</h4>
+
+                <p class="claim">
+                    Pipedrive OAuth 2.0 requires requests to be authorized using access tokens passed in the Authorization header as Bearer tokens.
+                </p>
+
+                
+                    <p class="snippet">
+                        For AI agents: visit  for an index of all pages formatted in Markdown and endpoints in OpenAPI.
+
+Jump to Content
+
+Pipedrive Developer Documentation
+
+Pipedrive Developer Documentation
+
+API ReferenceTutorialsChangelogDev CommunityBlogPipedrive Developer Documentation
+
+Pipedrive Developer Documentation
+
+API ReferenceTutorialsChangelogDev CommunityBlog
+
+# OAuth 2.0 overview
+
+The recommended authorization protocol for all public apps available in the Pipedrive Marketplace is the industry-standard OAu
+                    </p>
+                    
+
+                
+                    <a
+                        class="source-link"
+                        href="https://pipedrive.readme.io/docs/marketplace-oauth-api"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open source
+                    </a>
+                    
+            </article>
+            
+
+            <article class="evidence-card">
+                <div class="evidence-header">
+                    <span class="evidence-number">
+                        Evidence 5
+                    </span>
+
+                    <span class="badge neutral">
+                        third_party
+                    </span>
+                </div>
+
+                <h4>Pipedrive API Review [August 2026]: Features &amp; Limits</h4>
+
+                <p class="claim">
+                    API access is included across all paid Pipedrive plans starting at $14/month, alongside a 14-day free trial and an indefinitely free developer sandbox account.
+                </p>
+
+                
+                    <p class="snippet">
+                        Token budget scales with plan tier and seats; heavy API usage requires higher plans or top-ups
+
+## Pipedrive API: Authentication &amp; Getting Started
+
+pipedrive-api-1
+
+Source: Pipedrive
+
+Getting API access requires a paid Pipedrive account on any plan. The Lite tier at $14/month per seat includes full API access, and a free developer sandbox account lets you build and test integrations without touching production data.
+
+Pipedrivesupports two authentication methods: a personal API token and OAuth 2.
+                    </p>
+                    
+
+                
+                    <a
+                        class="source-link"
+                        href="https://pipeline.zoominfo.com/sales/pipedrive-api"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Open source
+                    </a>
+                    
+            </article>
+            
+            </div>
+
+        </div>
+
+    </section>
+    
+
+        </section>
+
+        
+
+    </div>
+
+</main>
+
+<footer>
+
+    <div class="container">
+        Generated by the SKS Multi-Agent Research Assistant.
+    </div>
+
+</footer>
+
+</body>
+</html>

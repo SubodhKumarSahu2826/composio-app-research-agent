@@ -1,12 +1,11 @@
 import json
 import time
+from dataclasses import asdict, is_dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from src.gemini_client import (
-    GeminiQuotaError,
-    GeminiTemporaryError,
-)
+from src.gemini_client import GeminiQuotaError
 from src.research_agent import ResearchAgent
 
 
@@ -24,6 +23,8 @@ class ResearchPipeline:
     - Save failed applications separately
     - Resume previously completed work
     - Persist progress checkpoints
+    - Persist Phase 2 verification metadata
+    - Persist Phase 2 analysis metadata
     """
 
     def __init__(
@@ -59,7 +60,7 @@ class ResearchPipeline:
         self.agent = ResearchAgent()
 
     # =========================================================
-    # Data loading
+    # DATA LOADING
     # =========================================================
 
     def load_apps(self) -> list[dict]:
@@ -78,10 +79,6 @@ class ResearchPipeline:
 
         return apps
 
-    # =========================================================
-    # Existing state
-    # =========================================================
-
     def load_results(self) -> list[dict]:
         """Load previously completed results."""
 
@@ -95,10 +92,17 @@ class ResearchPipeline:
             ) as file:
                 data = json.load(file)
 
-        except (json.JSONDecodeError, OSError):
+        except (
+            json.JSONDecodeError,
+            OSError,
+        ):
             return []
 
-        return data if isinstance(data, list) else []
+        return (
+            data
+            if isinstance(data, list)
+            else []
+        )
 
     def load_failures(self) -> list[dict]:
         """Load previously recorded failures."""
@@ -113,13 +117,20 @@ class ResearchPipeline:
             ) as file:
                 data = json.load(file)
 
-        except (json.JSONDecodeError, OSError):
+        except (
+            json.JSONDecodeError,
+            OSError,
+        ):
             return []
 
-        return data if isinstance(data, list) else []
+        return (
+            data
+            if isinstance(data, list)
+            else []
+        )
 
     # =========================================================
-    # Persistence
+    # PERSISTENCE
     # =========================================================
 
     def save_results(
@@ -129,7 +140,8 @@ class ResearchPipeline:
         """Persist successful results atomically."""
 
         temporary_file = (
-            self.results_dir / "results.tmp.json"
+            self.results_dir
+            / "results.tmp.json"
         )
 
         with temporary_file.open(
@@ -154,7 +166,8 @@ class ResearchPipeline:
         """Persist failures atomically."""
 
         temporary_file = (
-            self.results_dir / "failures.tmp.json"
+            self.results_dir
+            / "failures.tmp.json"
         )
 
         with temporary_file.open(
@@ -195,7 +208,8 @@ class ResearchPipeline:
         }
 
         temporary_file = (
-            self.results_dir / "progress.tmp.json"
+            self.results_dir
+            / "progress.tmp.json"
         )
 
         with temporary_file.open(
@@ -213,7 +227,141 @@ class ResearchPipeline:
         )
 
     # =========================================================
-    # Retry handling
+    # JSON SERIALIZATION
+    # =========================================================
+
+    @staticmethod
+    def _make_json_serializable(
+        value: Any,
+    ) -> Any:
+        """
+        Convert Phase 2 objects into JSON-compatible data.
+
+        Handles:
+
+        - Pydantic models
+        - dataclasses
+        - enums
+        - dictionaries
+        - lists / tuples / sets
+        - primitive values
+        """
+
+        if value is None:
+            return None
+
+        if isinstance(value, Enum):
+            return value.value
+
+        if hasattr(
+            value,
+            "model_dump",
+        ):
+            try:
+                dumped = value.model_dump(
+                    mode="json"
+                )
+            except TypeError:
+                dumped = value.model_dump()
+
+            return ResearchPipeline._make_json_serializable(
+                dumped
+            )
+
+        if is_dataclass(value):
+            return ResearchPipeline._make_json_serializable(
+                asdict(value)
+            )
+
+        if isinstance(value, dict):
+            return {
+                str(key): ResearchPipeline._make_json_serializable(
+                    item
+                )
+                for key, item in value.items()
+            }
+
+        if isinstance(
+            value,
+            (
+                list,
+                tuple,
+                set,
+            ),
+        ):
+            return [
+                ResearchPipeline._make_json_serializable(
+                    item
+                )
+                for item in value
+            ]
+
+        if isinstance(
+            value,
+            (
+                str,
+                int,
+                float,
+                bool,
+            ),
+        ):
+            return value
+
+        # Last-resort conversion for unexpected objects.
+        return str(value)
+
+    # =========================================================
+    # PHASE 2 METADATA
+    # =========================================================
+
+    @staticmethod
+    def _serialize_phase2_metadata(
+        result: Any,
+    ) -> dict:
+        """
+        Serialize deterministic Phase 2 metadata.
+
+        ResearchAgent attaches:
+
+            result._verification
+            result._analysis
+
+        These runtime attributes are not included in
+        AppResearch.model_dump().
+        """
+
+        metadata: dict = {}
+
+        verification = getattr(
+            result,
+            "_verification",
+            None,
+        )
+
+        if verification is not None:
+            metadata["verification"] = (
+                ResearchPipeline._make_json_serializable(
+                    verification
+                )
+            )
+
+        analysis = getattr(
+            result,
+            "_analysis",
+            None,
+        )
+
+        if analysis is not None:
+            metadata["analysis"] = (
+                ResearchPipeline._make_json_serializable(
+                    analysis
+                )
+            )
+
+        return metadata
+
+    # =========================================================
+    # RETRY HANDLING
     # =========================================================
 
     def _research_with_retry(
@@ -223,9 +371,9 @@ class ResearchPipeline:
         """
         Research one application with bounded retries.
 
-        Application-specific failures are retried.
+        Gemini quota exhaustion is propagated immediately.
 
-        Global quota exhaustion is immediately propagated.
+        Other application-level errors are retried.
         """
 
         last_error: Exception | None = None
@@ -240,8 +388,6 @@ class ResearchPipeline:
                 )
 
             except GeminiQuotaError:
-                # Global quota is exhausted.
-                # Retrying another application is pointless.
                 raise
 
             except Exception as exc:
@@ -258,7 +404,7 @@ class ResearchPipeline:
 
                 print(
                     f"  Retrying in "
-                    f"{self.retry_delay} seconds..."
+                    f"{self.retry_delay}s..."
                 )
 
                 time.sleep(
@@ -271,7 +417,7 @@ class ResearchPipeline:
         ) from last_error
 
     # =========================================================
-    # Main batch execution
+    # MAIN PIPELINE
     # =========================================================
 
     def run(
@@ -312,17 +458,21 @@ class ResearchPipeline:
         print("=" * 70)
         print("RESEARCH PIPELINE")
         print("=" * 70)
+
         print(
             f"Applications in run: {total}"
         )
+
         print(
             f"Previously completed: "
             f"{len(completed_ids)}"
         )
+
         print(
             f"Previously failed: "
             f"{len(failed_ids)}"
         )
+
         print("=" * 70)
 
         stopped_early = False
@@ -335,6 +485,10 @@ class ResearchPipeline:
             app_id = app["id"]
             app_name = app["name"]
 
+            # -------------------------------------------------
+            # Already completed
+            # -------------------------------------------------
+
             if app_id in completed_ids:
                 print(
                     f"\n[{index}/{total}] "
@@ -342,6 +496,10 @@ class ResearchPipeline:
                     f"(already completed)"
                 )
                 continue
+
+            # -------------------------------------------------
+            # Previously failed
+            # -------------------------------------------------
 
             if app_id in failed_ids:
                 print(
@@ -360,46 +518,95 @@ class ResearchPipeline:
                     app
                 )
 
+                # -------------------------------------------------
+                # Build complete result BEFORE modifying state.
+                # -------------------------------------------------
+
                 result_dict = result.model_dump(
                     mode="json"
                 )
 
-                failures = [
+                phase2_metadata = (
+                    self._serialize_phase2_metadata(
+                        result
+                    )
+                )
+
+                result_dict.update(
+                    phase2_metadata
+                )
+
+                # -------------------------------------------------
+                # Validate JSON serializability BEFORE modifying
+                # completed_ids.
+                # -------------------------------------------------
+
+                json.dumps(
+                    result_dict,
+                    ensure_ascii=False,
+                )
+
+                # -------------------------------------------------
+                # Remove previous failure after successful research.
+                # -------------------------------------------------
+
+                new_failures = [
                     failure
                     for failure in failures
-                    if failure.get("app_id") != app_id
+                    if failure.get("app_id")
+                    != app_id
                 ]
+
+                # -------------------------------------------------
+                # Replace existing result.
+                # -------------------------------------------------
+
+                new_results = [
+                    existing
+                    for existing in results
+                    if existing.get("app_id")
+                    != app_id
+                ]
+
+                new_results.append(
+                    result_dict
+                )
+
+                # -------------------------------------------------
+                # Persist everything BEFORE marking app completed.
+                # -------------------------------------------------
+
+                self.save_results(
+                    new_results
+                )
+
+                self.save_failures(
+                    new_failures
+                )
+
+                # -------------------------------------------------
+                # Only now update in-memory state.
+                # -------------------------------------------------
+
+                results = new_results
+                failures = new_failures
 
                 failed_ids.discard(
                     app_id
-                )
-
-                results = [
-                    existing
-                    for existing in results
-                    if existing.get("app_id") != app_id
-                ]
-
-                results.append(
-                    result_dict
                 )
 
                 completed_ids.add(
                     app_id
                 )
 
-                self.save_results(
-                    results
-                )
-
-                self.save_failures(
-                    failures
-                )
-
                 self.save_progress(
                     total=total,
-                    completed=len(completed_ids),
-                    failed=len(failed_ids),
+                    completed=len(
+                        completed_ids
+                    ),
+                    failed=len(
+                        failed_ids
+                    ),
                 )
 
                 print(
@@ -407,10 +614,11 @@ class ResearchPipeline:
                     f"{app_name}"
                 )
 
+            # =====================================================
+            # GLOBAL GEMINI QUOTA FAILURE
+            # =====================================================
+
             except GeminiQuotaError as exc:
-                # -------------------------------------------------
-                # GLOBAL FAILURE
-                # -------------------------------------------------
 
                 failure = {
                     "app_id": app_id,
@@ -425,7 +633,8 @@ class ResearchPipeline:
                 failures = [
                     existing
                     for existing in failures
-                    if existing.get("app_id") != app_id
+                    if existing.get("app_id")
+                    != app_id
                 ]
 
                 failures.append(
@@ -442,8 +651,12 @@ class ResearchPipeline:
 
                 self.save_progress(
                     total=total,
-                    completed=len(completed_ids),
-                    failed=len(failed_ids),
+                    completed=len(
+                        completed_ids
+                    ),
+                    failed=len(
+                        failed_ids
+                    ),
                     status="paused",
                     stop_reason=(
                         "Gemini API quota exhausted"
@@ -475,11 +688,18 @@ class ResearchPipeline:
                 )
 
                 stopped_early = True
-                stop_reason = str(exc)
+                stop_reason = str(
+                    exc
+                )
 
                 break
 
+            # =====================================================
+            # APPLICATION FAILURE
+            # =====================================================
+
             except Exception as exc:
+
                 failure = {
                     "app_id": app_id,
                     "app_name": app_name,
@@ -493,7 +713,8 @@ class ResearchPipeline:
                 failures = [
                     existing
                     for existing in failures
-                    if existing.get("app_id") != app_id
+                    if existing.get("app_id")
+                    != app_id
                 ]
 
                 failures.append(
@@ -510,8 +731,12 @@ class ResearchPipeline:
 
                 self.save_progress(
                     total=total,
-                    completed=len(completed_ids),
-                    failed=len(failed_ids),
+                    completed=len(
+                        completed_ids
+                    ),
+                    failed=len(
+                        failed_ids
+                    ),
                 )
 
                 print(
@@ -525,9 +750,9 @@ class ResearchPipeline:
 
                 continue
 
-        # =====================================================
-        # Final summary
-        # =====================================================
+        # =========================================================
+        # FINAL SUMMARY
+        # =========================================================
 
         status = (
             "paused"
@@ -535,10 +760,21 @@ class ResearchPipeline:
             else "completed"
         )
 
+        remaining = max(
+            total
+            - len(completed_ids)
+            - len(failed_ids),
+            0,
+        )
+
         self.save_progress(
             total=total,
-            completed=len(completed_ids),
-            failed=len(failed_ids),
+            completed=len(
+                completed_ids
+            ),
+            failed=len(
+                failed_ids
+            ),
             status=status,
             stop_reason=stop_reason,
         )
@@ -553,16 +789,17 @@ class ResearchPipeline:
         )
 
         print(
-            f"Completed:   {len(completed_ids)}"
+            f"Completed:   "
+            f"{len(completed_ids)}"
         )
 
         print(
-            f"Failed:      {len(failed_ids)}"
+            f"Failed:      "
+            f"{len(failed_ids)}"
         )
 
         print(
-            f"Remaining:   "
-            f"{max(total - len(completed_ids) - len(failed_ids), 0)}"
+            f"Remaining:   {remaining}"
         )
 
         print(
@@ -570,16 +807,20 @@ class ResearchPipeline:
         )
 
         print()
+
         print(
-            f"Results:     {self.results_file}"
+            f"Results:     "
+            f"{self.results_file}"
         )
 
         print(
-            f"Failures:    {self.failures_file}"
+            f"Failures:    "
+            f"{self.failures_file}"
         )
 
         print(
-            f"Progress:    {self.progress_file}"
+            f"Progress:    "
+            f"{self.progress_file}"
         )
 
         print("=" * 70)
@@ -590,8 +831,6 @@ def main() -> None:
 
     pipeline = ResearchPipeline()
 
-    # Keep this small until the complete Phase 2 architecture
-    # has been validated.
     pipeline.run(
         limit=3
     )
