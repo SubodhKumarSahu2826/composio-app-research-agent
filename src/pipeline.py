@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import argparse
 import json
 import time
 from dataclasses import asdict, is_dataclass
@@ -25,6 +28,19 @@ class ResearchPipeline:
     - Persist progress checkpoints
     - Persist Phase 2 verification metadata
     - Persist Phase 2 analysis metadata
+
+    Batch semantics:
+
+        --limit 5
+
+    means:
+
+        "Process at most 5 applications that are not already
+        completed."
+
+    It does NOT mean:
+
+        "Only consider the first 5 applications in apps.json."
     """
 
     def __init__(
@@ -250,7 +266,10 @@ class ResearchPipeline:
         if value is None:
             return None
 
-        if isinstance(value, Enum):
+        if isinstance(
+            value,
+            Enum,
+        ):
             return value.value
 
         if hasattr(
@@ -273,10 +292,15 @@ class ResearchPipeline:
                 asdict(value)
             )
 
-        if isinstance(value, dict):
+        if isinstance(
+            value,
+            dict,
+        ):
             return {
-                str(key): ResearchPipeline._make_json_serializable(
-                    item
+                str(key): (
+                    ResearchPipeline._make_json_serializable(
+                        item
+                    )
                 )
                 for key, item in value.items()
             }
@@ -429,15 +453,25 @@ class ResearchPipeline:
 
         Args:
             limit:
-                Optional number of applications to process.
+                Maximum number of pending applications to process
+                during this execution.
+
+                Completed applications are excluded from the batch.
+
+                Previously failed applications remain eligible for
+                retry.
+
+        Example:
+
+            limit=5
+
+        means:
+
+            Process up to 5 applications that are not already
+            completed.
         """
 
-        apps = self.load_apps()
-
-        if limit is not None:
-            apps = apps[:limit]
-
-        total = len(apps)
+        all_apps = self.load_apps()
 
         results = self.load_results()
         failures = self.load_failures()
@@ -453,6 +487,50 @@ class ResearchPipeline:
             for item in failures
             if item.get("app_id") is not None
         }
+
+        # =========================================================
+        # VALIDATE LIMIT
+        # =========================================================
+
+        if limit is not None and limit <= 0:
+            raise ValueError(
+                "limit must be greater than 0."
+            )
+
+        # =========================================================
+        # SELECT PENDING APPLICATIONS
+        # =========================================================
+        #
+        # IMPORTANT:
+        #
+        # We do NOT do:
+        #
+        #     all_apps[:limit]
+        #
+        # because that would make --limit useless when the first
+        # applications are already completed.
+        #
+        # Instead, completed applications are removed first.
+        #
+        # Previously failed applications remain eligible for retry.
+        # =========================================================
+
+        pending_apps = [
+            app
+            for app in all_apps
+            if app.get("id") not in completed_ids
+        ]
+
+        if limit is not None:
+            apps = pending_apps[:limit]
+        else:
+            apps = pending_apps
+
+        total = len(apps)
+
+        # =========================================================
+        # DISPLAY RUN INFORMATION
+        # =========================================================
 
         print()
         print("=" * 70)
@@ -475,8 +553,60 @@ class ResearchPipeline:
 
         print("=" * 70)
 
+        # If there is nothing left to process, finish cleanly.
+        if not apps:
+            self.save_progress(
+                total=len(all_apps),
+                completed=len(
+                    completed_ids
+                ),
+                failed=len(
+                    failed_ids
+                ),
+                status="completed",
+                stop_reason=None,
+            )
+
+            print()
+            print(
+                "No pending applications."
+            )
+
+            print()
+            print("=" * 70)
+            print("PIPELINE COMPLETE")
+            print("=" * 70)
+
+            print(
+                f"Dataset total: "
+                f"{len(all_apps)}"
+            )
+
+            print(
+                f"Completed:     "
+                f"{len(completed_ids)}"
+            )
+
+            print(
+                f"Failed:        "
+                f"{len(failed_ids)}"
+            )
+
+            print(
+                f"Remaining:     "
+                f"{max(len(all_apps) - len(completed_ids) - len(failed_ids), 0)}"
+            )
+
+            print("=" * 70)
+
+            return
+
         stopped_early = False
         stop_reason = None
+
+        # =========================================================
+        # PROCESS BATCH
+        # =========================================================
 
         for index, app in enumerate(
             apps,
@@ -484,18 +614,6 @@ class ResearchPipeline:
         ):
             app_id = app["id"]
             app_name = app["name"]
-
-            # -------------------------------------------------
-            # Already completed
-            # -------------------------------------------------
-
-            if app_id in completed_ids:
-                print(
-                    f"\n[{index}/{total}] "
-                    f"Skipping {app_name} "
-                    f"(already completed)"
-                )
-                continue
 
             # -------------------------------------------------
             # Previously failed
@@ -518,9 +636,9 @@ class ResearchPipeline:
                     app
                 )
 
-                # -------------------------------------------------
-                # Build complete result BEFORE modifying state.
-                # -------------------------------------------------
+                # =================================================
+                # BUILD COMPLETE RESULT
+                # =================================================
 
                 result_dict = result.model_dump(
                     mode="json"
@@ -536,19 +654,18 @@ class ResearchPipeline:
                     phase2_metadata
                 )
 
-                # -------------------------------------------------
-                # Validate JSON serializability BEFORE modifying
-                # completed_ids.
-                # -------------------------------------------------
+                # =================================================
+                # VALIDATE JSON SERIALIZABILITY
+                # =================================================
 
                 json.dumps(
                     result_dict,
                     ensure_ascii=False,
                 )
 
-                # -------------------------------------------------
-                # Remove previous failure after successful research.
-                # -------------------------------------------------
+                # =================================================
+                # REMOVE PREVIOUS FAILURE
+                # =================================================
 
                 new_failures = [
                     failure
@@ -557,9 +674,9 @@ class ResearchPipeline:
                     != app_id
                 ]
 
-                # -------------------------------------------------
-                # Replace existing result.
-                # -------------------------------------------------
+                # =================================================
+                # REPLACE EXISTING RESULT
+                # =================================================
 
                 new_results = [
                     existing
@@ -572,9 +689,9 @@ class ResearchPipeline:
                     result_dict
                 )
 
-                # -------------------------------------------------
-                # Persist everything BEFORE marking app completed.
-                # -------------------------------------------------
+                # =================================================
+                # PERSIST BEFORE UPDATING STATE
+                # =================================================
 
                 self.save_results(
                     new_results
@@ -584,9 +701,9 @@ class ResearchPipeline:
                     new_failures
                 )
 
-                # -------------------------------------------------
-                # Only now update in-memory state.
-                # -------------------------------------------------
+                # =================================================
+                # UPDATE IN-MEMORY STATE
+                # =================================================
 
                 results = new_results
                 failures = new_failures
@@ -599,14 +716,19 @@ class ResearchPipeline:
                     app_id
                 )
 
+                # =================================================
+                # SAVE PROGRESS
+                # =================================================
+
                 self.save_progress(
-                    total=total,
+                    total=len(all_apps),
                     completed=len(
                         completed_ids
                     ),
                     failed=len(
                         failed_ids
                     ),
+                    status="running",
                 )
 
                 print(
@@ -650,7 +772,7 @@ class ResearchPipeline:
                 )
 
                 self.save_progress(
-                    total=total,
+                    total=len(all_apps),
                     completed=len(
                         completed_ids
                     ),
@@ -730,13 +852,14 @@ class ResearchPipeline:
                 )
 
                 self.save_progress(
-                    total=total,
+                    total=len(all_apps),
                     completed=len(
                         completed_ids
                     ),
                     failed=len(
                         failed_ids
                     ),
+                    status="running",
                 )
 
                 print(
@@ -761,14 +884,14 @@ class ResearchPipeline:
         )
 
         remaining = max(
-            total
+            len(all_apps)
             - len(completed_ids)
             - len(failed_ids),
             0,
         )
 
         self.save_progress(
-            total=total,
+            total=len(all_apps),
             completed=len(
                 completed_ids
             ),
@@ -785,7 +908,13 @@ class ResearchPipeline:
         print("=" * 70)
 
         print(
-            f"Total:       {total}"
+            f"Dataset total: "
+            f"{len(all_apps)}"
+        )
+
+        print(
+            f"Batch processed: "
+            f"{total}"
         )
 
         print(
@@ -799,11 +928,13 @@ class ResearchPipeline:
         )
 
         print(
-            f"Remaining:   {remaining}"
+            f"Remaining:   "
+            f"{remaining}"
         )
 
         print(
-            f"Status:      {status}"
+            f"Status:      "
+            f"{status}"
         )
 
         print()
@@ -827,12 +958,46 @@ class ResearchPipeline:
 
 
 def main() -> None:
-    """Phase 2 development entry point."""
+    """
+    Command-line entry point.
+
+    Examples:
+
+        python -m src.pipeline
+
+        python -m src.pipeline --limit 5
+
+        python -m src.pipeline --limit 10
+    """
+
+    parser = argparse.ArgumentParser(
+        description=(
+            "Run the application research pipeline."
+        )
+    )
+
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=3,
+        help=(
+            "Maximum number of pending applications "
+            "to process in this execution. "
+            "Default: 3."
+        ),
+    )
+
+    args = parser.parse_args()
+
+    if args.limit <= 0:
+        parser.error(
+            "--limit must be greater than 0."
+        )
 
     pipeline = ResearchPipeline()
 
     pipeline.run(
-        limit=3
+        limit=args.limit
     )
 
 
