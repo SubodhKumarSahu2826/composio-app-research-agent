@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from pathlib import Path
 
@@ -46,9 +48,13 @@ class ResearchAgent:
         self.verifier = ResearchVerifier()
         self.analyzer = ResearchAnalyzer()
 
-    def research_app(self, app: dict):
+    def research_app(
+        self,
+        app: dict,
+    ):
         """
-        Research one application and return a validated AppResearch object.
+        Research one application and return a validated
+        AppResearch object.
 
         The research process is split into:
 
@@ -61,11 +67,14 @@ class ResearchAgent:
         """
 
         app_name = app["name"]
+
         official_domain = self._extract_domain(
-            app["website"]
+            app.get("website", "")
         )
 
-        print(f"\nResearching: {app_name}")
+        print(
+            f"\nResearching: {app_name}"
+        )
 
         # =========================================================
         # 1. WEB EVIDENCE RETRIEVAL
@@ -75,14 +84,28 @@ class ResearchAgent:
         seen_urls = set()
 
         queries = [
-            f"{app_name} API authentication developer documentation",
-            f"{app_name} API access requirements developer",
-            f"{app_name} REST API documentation",
-            f"{app_name} MCP Model Context Protocol",
+            (
+                f"{app_name} "
+                "API authentication developer documentation"
+            ),
+            (
+                f"{app_name} "
+                "API access requirements developer"
+            ),
+            (
+                f"{app_name} "
+                "REST API documentation"
+            ),
+            (
+                f"{app_name} "
+                "MCP Model Context Protocol"
+            ),
         ]
 
         for query in queries:
-            print(f"  Web search: {query}")
+            print(
+                f"  Web search: {query}"
+            )
 
             results = self.web.search(
                 query=query,
@@ -153,13 +176,19 @@ class ResearchAgent:
         # 4. COMPOSIO DISCOVERY
         # =========================================================
 
-        print("  Composio discovery...")
-
-        composio_result = self.composio.find_toolkit(
-            app_name
+        print(
+            "  Composio discovery..."
         )
 
-        if composio_result["toolkit_found"]:
+        composio_result = (
+            self.composio.find_toolkit(
+                app_name
+            )
+        )
+
+        if composio_result[
+            "toolkit_found"
+        ]:
             print(
                 "  Composio toolkit found: "
                 f"{composio_result['toolkit_slug']}"
@@ -219,7 +248,9 @@ class ResearchAgent:
         # 6. GEMINI EXTRACTION
         # =========================================================
 
-        print("  Gemini analysis...")
+        print(
+            "  Gemini analysis..."
+        )
 
         result = self.extractor.extract(
             app=app,
@@ -239,22 +270,16 @@ class ResearchAgent:
         # =========================================================
         # 7. DETERMINISTIC VERIFICATION
         # =========================================================
-        #
-        # Important:
-        #
-        # ResearchVerifier.verify() expects:
-        #
-        #     result=AppResearch
-        #     evidence=list[dict]
-        #
-        # It does not accept research=...
-        # =========================================================
 
-        print("  Verifying research...")
+        print(
+            "  Verifying research..."
+        )
 
-        verification = self.verifier.verify(
-            result=result,
-            evidence=evidence_bundle,
+        verification = (
+            self.verifier.verify(
+                result=result,
+                evidence=evidence_bundle,
+            )
         )
 
         if verification.passed:
@@ -281,13 +306,6 @@ class ResearchAgent:
         # =========================================================
         # 8. DETERMINISTIC ANALYSIS
         # =========================================================
-        #
-        # ResearchAnalyzer.analyze() currently accepts only:
-        #
-        #     research=AppResearch
-        #
-        # Verification is therefore not passed into the analyzer.
-        # =========================================================
 
         print(
             "  Analyzing research quality..."
@@ -304,32 +322,63 @@ class ResearchAgent:
         # =========================================================
         # 9. ATTACH PHASE 2 METADATA
         # =========================================================
-        #
-        # AppResearch remains the canonical Pydantic model.
-        #
-        # Verification and analysis are attached as runtime
-        # attributes for the current Phase 2 integration.
-        # =========================================================
 
-        result._verification = verification
-        result._analysis = analysis
+        result._verification = (
+            verification
+        )
+
+        result._analysis = (
+            analysis
+        )
 
         return result
 
     @staticmethod
     def _extract_domain(
         website: str,
-    ) -> str:
+    ) -> str | None:
         """
         Extract a usable domain from an application website.
 
-        Example:
+        Valid examples:
 
             https://www.salesforce.com/in/
             -> www.salesforce.com
+
+            http://example.com/docs
+            -> example.com
+
+            example.com/docs
+            -> example.com
+
+        Invalid/unresolved examples:
+
+            Paygent (NMI-powered)
+            Some Application Name
+            ""
+            "   "
+
+        Returns None when the supplied value is not a plausible
+        domain.
+
+        This prevents unresolved dataset metadata from being
+        incorrectly passed to Tavily as an official domain.
         """
 
+        if not isinstance(
+            website,
+            str,
+        ):
+            return None
+
         website = website.strip()
+
+        if not website:
+            return None
+
+        # ---------------------------------------------------------
+        # Remove URL scheme.
+        # ---------------------------------------------------------
 
         if website.startswith(
             "https://"
@@ -345,12 +394,86 @@ class ResearchAgent:
                 len("http://") :
             ]
 
-        website = website.split(
+        else:
+            # Bare domains are allowed.
+            #
+            # Arbitrary text containing whitespace is not a
+            # plausible domain.
+            if any(
+                character.isspace()
+                for character in website
+            ):
+                return None
+
+        # ---------------------------------------------------------
+        # Remove path.
+        # ---------------------------------------------------------
+
+        domain = website.split(
             "/",
             1,
         )[0]
 
-        return website
+        # ---------------------------------------------------------
+        # Remove query string.
+        # ---------------------------------------------------------
+
+        domain = domain.split(
+            "?",
+            1,
+        )[0]
+
+        # ---------------------------------------------------------
+        # Remove fragment.
+        # ---------------------------------------------------------
+
+        domain = domain.split(
+            "#",
+            1,
+        )[0]
+
+        domain = domain.strip().lower()
+
+        if not domain:
+            return None
+
+        # ---------------------------------------------------------
+        # A normal DNS hostname should contain a dot.
+        # ---------------------------------------------------------
+
+        if "." not in domain:
+            return None
+
+        # ---------------------------------------------------------
+        # Reject malformed hostnames.
+        # ---------------------------------------------------------
+
+        if domain.startswith("."):
+            return None
+
+        if domain.endswith("."):
+            return None
+
+        if ".." in domain:
+            return None
+
+        # ---------------------------------------------------------
+        # Allow normal hostname characters only.
+        # ---------------------------------------------------------
+
+        allowed_characters = (
+            "abcdefghijklmnopqrstuvwxyz"
+            "0123456789"
+            ".-_"
+        )
+
+        if any(
+            character not in allowed_characters
+            for character in domain
+        ):
+            return None
+
+        return domain
 
 
 def load_apps() -> list[dict]:
