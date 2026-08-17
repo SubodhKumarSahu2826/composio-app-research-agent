@@ -1,6 +1,66 @@
 from src.extraction import ResearchExtractor
 
 
+class FakeGeminiClient:
+    """Deterministic Gemini replacement for unit tests."""
+
+    def generate_json(self, prompt: str) -> dict:
+        return {
+            "app_id": 1,
+            "app_name": "Salesforce",
+            "category": "CRM and Sales",
+            "description": (
+                "Salesforce provides APIs for application integration."
+            ),
+            "authentication": {
+                "methods": ["OAuth2"],
+                "confidence": 0.90,
+            },
+            "access": {
+                "type": "Unknown",
+                "requirements": [],
+                "confidence": 0.50,
+            },
+            "api": {
+                "type": "REST",
+                "breadth": "Broad",
+                "documentation_url": (
+                    "https://developer.salesforce.com/docs/"
+                ),
+                "confidence": 0.90,
+            },
+            "mcp": {
+                "status": "Unknown",
+                "official": None,
+                "url": None,
+                "confidence": 0.30,
+            },
+            "buildability": {
+                "verdict": "Possible",
+                "blocker": None,
+                "reasoning": (
+                    "The supplied evidence documents "
+                    "OAuth2 authentication and a REST API."
+                ),
+            },
+            "evidence": [
+                {
+                    "evidence_id": "WEB-001",
+                    "claim": (
+                        "Salesforce APIs use OAuth 2.0 "
+                        "authentication."
+                    ),
+                    "snippet": (
+                        "Salesforce APIs use OAuth 2.0 "
+                        "authentication through connected "
+                        "applications."
+                    ),
+                }
+            ],
+            "overall_confidence": 0.85,
+        }
+
+
 def test_extraction_from_evidence():
     app = {
         "id": 1,
@@ -37,38 +97,32 @@ def test_extraction_from_evidence():
         },
     ]
 
-    extractor = ResearchExtractor()
+    extractor = ResearchExtractor(
+        llm=FakeGeminiClient()
+    )
 
     result = extractor.extract(
         app=app,
         evidence=evidence,
     )
 
-    # Basic application validation.
     assert result.app_name == "Salesforce"
     assert result.category == "CRM and Sales"
 
-    # Authentication should have been extracted.
     assert result.authentication.methods
-
-    # Evidence should have been resolved from WEB-001.
     assert result.evidence
 
     evidence_item = result.evidence[0]
 
-    # Pydantic stores HttpUrl, so compare its string representation.
     assert str(evidence_item.url) == (
         "https://developer.salesforce.com/docs/"
     )
 
-    # These values must come from the original retrieved source,
-    # not from Gemini-generated metadata.
     assert evidence_item.source_name == (
         "Salesforce API Authentication"
     )
 
     assert evidence_item.source_type == "official_docs"
 
-    # The claim and snippet should also be populated.
     assert evidence_item.claim
     assert evidence_item.snippet

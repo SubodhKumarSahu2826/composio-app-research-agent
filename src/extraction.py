@@ -1,4 +1,6 @@
 import json
+from typing import Any
+from urllib.parse import urlparse
 
 from src.gemini_client import GeminiClient
 from src.models import AppResearch
@@ -6,26 +8,62 @@ from src.models import AppResearch
 
 class ResearchExtractor:
     """
-    Extract structured research findings from evidence.
+    Extract structured research findings from retrieved evidence.
 
     Architecture:
 
         Retrieved Evidence
                ↓
+        Stable WEB-* evidence IDs
+               ↓
         Gemini selects evidence IDs
+               ↓
+        Python normalizes LLM output
                ↓
         Python resolves provenance
                ↓
         Pydantic validation
 
     Gemini is NOT trusted to generate:
+
         - URLs
         - source names
         - source types
+        - evidence snippets
+
+    Gemini only decides:
+
+        - what the claim is
+        - which evidence ID supports it
+        - which evidence ID supports API documentation
+        - which evidence ID supports MCP
+
+    Python resolves all provenance-sensitive fields.
     """
 
-    def __init__(self) -> None:
-        self.llm = GeminiClient()
+    def __init__(
+        self,
+        llm: Any | None = None,
+    ) -> None:
+        """
+        Initialize the extractor.
+
+        Args:
+            llm:
+                Optional injectable LLM client.
+
+                Production:
+                    ResearchExtractor()
+
+                Tests:
+                    ResearchExtractor(llm=FakeGeminiClient())
+        """
+
+        self.llm = llm or GeminiClient()
+
+    # =============================================================
+    # Public API
+    # =============================================================
 
     def extract(
         self,
@@ -33,7 +71,10 @@ class ResearchExtractor:
         evidence: list[dict],
     ) -> AppResearch:
         """
-        Convert retrieved evidence into a validated AppResearch result.
+        Convert retrieved evidence into a validated AppResearch.
+
+        The LLM produces analytical decisions, while Python resolves
+        all source provenance deterministically.
         """
 
         prompt = self._build_prompt(
@@ -43,23 +84,603 @@ class ResearchExtractor:
 
         raw_result = self.llm.generate_json(prompt)
 
-        # Gemini selects evidence IDs.
-        # Python resolves the actual provenance.
-        raw_result = self._resolve_evidence(
+        if not isinstance(raw_result, dict):
+            raise ValueError(
+                "Gemini output must be a JSON object."
+            )
+
+        # ---------------------------------------------------------
+        # Normalize harmless LLM variations before Pydantic.
+        #
+        # Gemini may return:
+        #
+        #   "Official"
+        #
+        # while our canonical model expects:
+        #
+        #   "Official MCP"
+        #
+        # This layer normalizes schema labels. It does NOT invent
+        # research facts.
+        # ---------------------------------------------------------
+
+        raw_result = self._normalize_llm_output(
+            raw_result
+        )
+
+        # ---------------------------------------------------------
+        # Resolve every provenance-sensitive field before
+        # Pydantic validation.
+        # ---------------------------------------------------------
+
+        raw_result = self._resolve_provenance(
             result=raw_result,
             evidence=evidence,
+            official_domain=self._extract_domain(
+                app.get("website", "")
+            ),
         )
 
         try:
-            return AppResearch.model_validate(raw_result)
+            return AppResearch.model_validate(
+                raw_result
+            )
 
         except Exception as exc:
             raise ValueError(
-                f"Gemini output failed AppResearch validation: {exc}"
+                "Gemini output failed AppResearch validation: "
+                f"{exc}"
             ) from exc
 
     # =============================================================
-    # Evidence provenance
+    # LLM output normalization
+    # =============================================================
+
+    @staticmethod
+    def _normalize_llm_output(
+        result: dict,
+    ) -> dict:
+        """
+        Normalize harmless variations in Gemini's structured output.
+
+        The LLM is responsible for making research decisions.
+
+        Python is responsible for enforcing the application's
+        canonical schema.
+
+        This method does NOT create evidence or research facts.
+        It only converts equivalent labels into the exact enum
+        values expected by src.models.
+        """
+
+        if not isinstance(result, dict):
+            return result
+
+        # ---------------------------------------------------------
+        # MCP status
+        # ---------------------------------------------------------
+
+        mcp = result.get("mcp")
+
+        if isinstance(mcp, dict):
+            status = mcp.get("status")
+
+            mcp_status_map = {
+                "Official": "Official MCP",
+                "official": "Official MCP",
+                "Official MCP": "Official MCP",
+
+                "Third Party": "Third-party MCP",
+                "Third-Party": "Third-party MCP",
+                "third-party": "Third-party MCP",
+                "Third-party": "Third-party MCP",
+                "Third-party MCP": "Third-party MCP",
+
+                "None": "No MCP Found",
+                "No MCP": "No MCP Found",
+                "No MCP Found": "No MCP Found",
+
+                "Unknown": "Unknown",
+                "unknown": "Unknown",
+            }
+
+            if status in mcp_status_map:
+                mcp["status"] = (
+                    mcp_status_map[status]
+                )
+
+            # Keep the boolean flag consistent with the
+            # canonical MCP status.
+
+            if mcp.get("status") == "Official MCP":
+                mcp["official"] = True
+
+            elif mcp.get("status") == "Third-party MCP":
+                mcp["official"] = False
+
+            elif mcp.get("status") == "No MCP Found":
+                mcp["official"] = False
+
+            elif mcp.get("status") == "Unknown":
+                mcp["official"] = None
+
+            result["mcp"] = mcp
+
+        # ---------------------------------------------------------
+        # Authentication methods
+        # ---------------------------------------------------------
+
+        authentication = result.get(
+            "authentication"
+        )
+
+        if isinstance(authentication, dict):
+            methods = authentication.get(
+                "methods"
+            )
+
+            if isinstance(methods, list):
+                auth_map = {
+                    "OAuth": "OAuth2",
+                    "OAuth 2": "OAuth2",
+                    "OAuth 2.0": "OAuth2",
+                    "OAuth2": "OAuth2",
+
+                    "API key": "API Key",
+                    "API Key": "API Key",
+                    "API-Key": "API Key",
+
+                    "Bearer": "Bearer Token",
+                    "Bearer token": "Bearer Token",
+                    "Bearer Token": "Bearer Token",
+
+                    "JWT": "JWT",
+
+                    "Basic Auth": "Basic",
+                    "Basic Authentication": "Basic",
+                    "Basic": "Basic",
+
+                    "Unknown": "Unknown",
+                    "unknown": "Unknown",
+                }
+
+                normalized_methods = []
+
+                for method in methods:
+                    normalized = auth_map.get(
+                        method,
+                        method,
+                    )
+
+                    if normalized not in normalized_methods:
+                        normalized_methods.append(
+                            normalized
+                        )
+
+                authentication["methods"] = (
+                    normalized_methods
+                )
+
+            result["authentication"] = (
+                authentication
+            )
+
+        # ---------------------------------------------------------
+        # Access type
+        # ---------------------------------------------------------
+
+        access = result.get(
+            "access"
+        )
+
+        if isinstance(access, dict):
+            access_type = access.get(
+                "type"
+            )
+
+            access_map = {
+                "Free": "Self-serve / Free",
+                "Self-serve Free":
+                    "Self-serve / Free",
+                "Self-serve / Free":
+                    "Self-serve / Free",
+
+                "Trial": "Self-serve / Trial",
+                "Self-serve Trial":
+                    "Self-serve / Trial",
+                "Self-serve / Trial":
+                    "Self-serve / Trial",
+
+                "Paid":
+                    "Paid Plan Required",
+                "Paid Plan":
+                    "Paid Plan Required",
+                "Paid Plan Required":
+                    "Paid Plan Required",
+
+                "Admin Approval":
+                    "Admin Approval Required",
+                "Admin Approval Required":
+                    "Admin Approval Required",
+
+                "Partnership":
+                    "Partnership Required",
+                "Partnership Required":
+                    "Partnership Required",
+
+                "Sales":
+                    "Contact Sales",
+                "Contact Sales":
+                    "Contact Sales",
+
+                "Unknown": "Unknown",
+                "unknown": "Unknown",
+            }
+
+            if access_type in access_map:
+                access["type"] = access_map[
+                    access_type
+                ]
+
+            result["access"] = access
+
+        # ---------------------------------------------------------
+        # API type
+        # ---------------------------------------------------------
+
+        api = result.get(
+            "api"
+        )
+
+        if isinstance(api, dict):
+            api_type = api.get(
+                "type"
+            )
+
+            api_type_map = {
+                "REST API": "REST",
+                "REST": "REST",
+
+                "GraphQL API": "GraphQL",
+                "GraphQL": "GraphQL",
+
+                "REST and GraphQL":
+                    "REST + GraphQL",
+                "REST & GraphQL":
+                    "REST + GraphQL",
+                "REST + GraphQL":
+                    "REST + GraphQL",
+
+                "No API":
+                    "No Public API Found",
+                "No Public API":
+                    "No Public API Found",
+                "No Public API Found":
+                    "No Public API Found",
+
+                "Unknown": "Unknown",
+                "unknown": "Unknown",
+            }
+
+            if api_type in api_type_map:
+                api["type"] = api_type_map[
+                    api_type
+                ]
+
+            # -----------------------------------------------------
+            # API breadth
+            # -----------------------------------------------------
+
+            breadth = api.get(
+                "breadth"
+            )
+
+            breadth_map = {
+                "narrow": "Narrow",
+                "Narrow": "Narrow",
+
+                "moderate": "Moderate",
+                "Moderate": "Moderate",
+
+                "broad": "Broad",
+                "Broad": "Broad",
+
+                "unknown": "Unknown",
+                "Unknown": "Unknown",
+            }
+
+            if breadth in breadth_map:
+                api["breadth"] = breadth_map[
+                    breadth
+                ]
+
+            result["api"] = api
+
+        # ---------------------------------------------------------
+        # Buildability verdict
+        # ---------------------------------------------------------
+
+        buildability = result.get(
+            "buildability"
+        )
+
+        if isinstance(buildability, dict):
+            verdict = buildability.get(
+                "verdict"
+            )
+
+            verdict_map = {
+                "easy": "Easy",
+                "Easy": "Easy",
+
+                "possible": "Possible",
+                "Possible": "Possible",
+
+                "gated": "Gated",
+                "Gated": "Gated",
+
+                "blocked": "Blocked",
+                "Blocked": "Blocked",
+
+                "unknown": "Unknown",
+                "Unknown": "Unknown",
+            }
+
+            if verdict in verdict_map:
+                buildability["verdict"] = (
+                    verdict_map[verdict]
+                )
+
+            result["buildability"] = (
+                buildability
+            )
+
+        return result
+
+    # =============================================================
+    # Provenance resolution
+    # =============================================================
+
+    @staticmethod
+    def _resolve_provenance(
+        result: dict,
+        evidence: list[dict],
+        official_domain: str = "",
+    ) -> dict:
+        """
+        Resolve every Gemini-selected evidence ID against the
+        original web evidence.
+
+        Gemini provides IDs.
+
+        Python provides:
+
+            URL
+            source name
+            source type
+            snippet
+            API documentation URL
+            MCP URL
+
+        This guarantees that provenance cannot be hallucinated.
+        """
+
+        web_sources: dict[str, dict] = {}
+
+        for group in evidence:
+            if not isinstance(group, dict):
+                continue
+
+            if group.get("type") != "web_evidence":
+                continue
+
+            for item in group.get(
+                "items",
+                [],
+            ):
+                if not isinstance(
+                    item,
+                    dict,
+                ):
+                    continue
+
+                evidence_id = item.get(
+                    "evidence_id"
+                )
+
+                if evidence_id:
+                    web_sources[
+                        evidence_id
+                    ] = item
+
+        # ---------------------------------------------------------
+        # Resolve evidence[]
+        # ---------------------------------------------------------
+
+        resolved_evidence: list[dict] = []
+        seen_ids: set[str] = set()
+
+        for item in result.get(
+            "evidence",
+            [],
+        ):
+            if not isinstance(
+                item,
+                dict,
+            ):
+                continue
+
+            evidence_id = item.get(
+                "evidence_id"
+            )
+
+            if not evidence_id:
+                continue
+
+            if evidence_id in seen_ids:
+                continue
+
+            source = web_sources.get(
+                evidence_id
+            )
+
+            if source is None:
+                continue
+
+            seen_ids.add(
+                evidence_id
+            )
+
+            source_url = source.get(
+                "url",
+                "",
+            )
+
+            source_title = source.get(
+                "title",
+                "",
+            )
+
+            source_content = source.get(
+                "content",
+                "",
+            )
+
+            # The snippet comes directly from the original source.
+            # Gemini cannot rewrite provenance.
+            snippet = ResearchExtractor._build_snippet(
+                source_content
+            )
+
+            resolved_evidence.append(
+                {
+                    "claim": item.get(
+                        "claim",
+                        "",
+                    ),
+                    "url": source_url,
+                    "source_name": source_title,
+                    "source_type": (
+                        ResearchExtractor._classify_source(
+                            url=source_url,
+                            official_domain=official_domain,
+                        )
+                    ),
+                    "snippet": snippet,
+                }
+            )
+
+        result["evidence"] = (
+            resolved_evidence
+        )
+
+        # ---------------------------------------------------------
+        # Resolve API documentation URL
+        # ---------------------------------------------------------
+
+        api = result.get(
+            "api"
+        )
+
+        if not isinstance(
+            api,
+            dict,
+        ):
+            api = {}
+
+        api_documentation_id = api.pop(
+            "documentation_evidence_id",
+            None,
+        )
+
+        if api_documentation_id:
+            source = web_sources.get(
+                api_documentation_id
+            )
+
+            if source:
+                api["documentation_url"] = (
+                    source.get(
+                        "url"
+                    )
+                )
+            else:
+                api["documentation_url"] = None
+
+        else:
+            # Never trust a Gemini-generated URL.
+            api["documentation_url"] = None
+
+        result["api"] = api
+
+        # ---------------------------------------------------------
+        # Resolve MCP URL
+        # ---------------------------------------------------------
+
+        mcp = result.get(
+            "mcp"
+        )
+
+        if not isinstance(
+            mcp,
+            dict,
+        ):
+            mcp = {}
+
+        mcp_evidence_id = mcp.pop(
+            "evidence_id",
+            None,
+        )
+
+        if mcp_evidence_id:
+            source = web_sources.get(
+                mcp_evidence_id
+            )
+
+            if source:
+                mcp["url"] = source.get(
+                    "url"
+                )
+
+                source_type = (
+                    ResearchExtractor._classify_source(
+                        url=source.get(
+                            "url",
+                            "",
+                        ),
+                        official_domain=official_domain,
+                    )
+                )
+
+                # If Gemini claims Official MCP, make sure
+                # the selected source is actually official.
+                if (
+                    mcp.get("status")
+                    == "Official MCP"
+                    and source_type
+                    not in {
+                        "official_docs",
+                        "official_blog",
+                        "official_github",
+                    }
+                ):
+                    mcp["status"] = "Unknown"
+                    mcp["official"] = None
+                    mcp["url"] = None
+
+            else:
+                mcp["url"] = None
+
+        else:
+            # Never trust a Gemini-generated URL.
+            mcp["url"] = None
+
+        result["mcp"] = mcp
+
+        return result
+
+    # =============================================================
+    # Backwards-compatible evidence resolver
     # =============================================================
 
     @staticmethod
@@ -68,98 +689,52 @@ class ResearchExtractor:
         evidence: list[dict],
     ) -> dict:
         """
-        Resolve Gemini-selected evidence IDs against the original
-        web sources.
+        Backwards-compatible wrapper used by older tests/code.
 
-        Gemini decides:
-
-            Which source supports this claim?
-
-        Python decides:
-
-            URL
-            source name
-            source type
-
-        This prevents the LLM from corrupting provenance.
+        Resolves evidence using the original evidence structure.
         """
 
-        web_sources: dict[str, dict] = {}
+        return ResearchExtractor._resolve_provenance(
+            result=result,
+            evidence=evidence,
+        )
 
-        # ---------------------------------------------------------
-        # Build lookup:
-        #
-        # WEB-001 -> source
-        # WEB-002 -> source
-        # WEB-003 -> source
-        # ---------------------------------------------------------
+    # =============================================================
+    # Snippet handling
+    # =============================================================
 
-        for group in evidence:
-            if group.get("type") != "web_evidence":
-                continue
+    @staticmethod
+    def _build_snippet(
+        content: Any,
+        max_length: int = 500,
+    ) -> str:
+        """
+        Build a deterministic snippet from the original source.
 
-            for item in group.get("items", []):
-                evidence_id = item.get("evidence_id")
+        The returned text is always an exact substring of the
+        original retrieved content.
 
-                if evidence_id:
-                    web_sources[evidence_id] = item
+        This is important because the verifier checks that snippets
+        actually originate from the supplied source.
+        """
 
-        resolved_evidence = []
-        seen_ids = set()
+        if not isinstance(
+            content,
+            str,
+        ):
+            return ""
 
-        # ---------------------------------------------------------
-        # Resolve Gemini's evidence selections.
-        # ---------------------------------------------------------
+        content = content.strip()
 
-        for item in result.get("evidence", []):
-            evidence_id = item.get("evidence_id")
+        if not content:
+            return ""
 
-            # Gemini omitted evidence ID.
-            if not evidence_id:
-                continue
+        if len(content) <= max_length:
+            return content
 
-            # Avoid duplicate evidence.
-            if evidence_id in seen_ids:
-                continue
-
-            source = web_sources.get(evidence_id)
-
-            # Gemini invented an unknown evidence ID.
-            if source is None:
-                continue
-
-            seen_ids.add(evidence_id)
-
-            resolved_evidence.append(
-                {
-                    "claim": item.get(
-                        "claim",
-                        "",
-                    ),
-                    "url": source.get(
-                        "url",
-                        "",
-                    ),
-                    "source_name": source.get(
-                        "title",
-                        "",
-                    ),
-                    "source_type": ResearchExtractor._classify_source(
-                        url=source.get(
-                            "url",
-                            "",
-                        ),
-                    ),
-                    "snippet": item.get(
-                        "snippet",
-                        "",
-                    ),
-                }
-            )
-
-        result["evidence"] = resolved_evidence
-
-        return result
+        return content[
+            :max_length
+        ].rstrip()
 
     # =============================================================
     # Source classification
@@ -171,12 +746,19 @@ class ResearchExtractor:
         official_domain: str = "",
     ) -> str:
         """
-        Classify the source deterministically from its URL.
+        Classify a source deterministically from its URL.
 
-        Gemini does not control this value.
+        Gemini does not control source_type.
         """
 
-        normalized_url = url.lower().strip()
+        normalized_url = (
+            str(url)
+            .lower()
+            .strip()
+        )
+
+        if not normalized_url:
+            return "other"
 
         # ---------------------------------------------------------
         # Video
@@ -196,26 +778,62 @@ class ResearchExtractor:
             return "official_github"
 
         # ---------------------------------------------------------
-        # Application-specific official domain
+        # Official application domain
         # ---------------------------------------------------------
 
-        if official_domain:
-            normalized_domain = official_domain.lower().strip()
+        normalized_domain = (
+            official_domain
+            .lower()
+            .strip()
+        )
 
-            if normalized_domain in normalized_url:
+        hostname = ""
 
-                if "/blog" in normalized_url:
+        try:
+            hostname = (
+                urlparse(
+                    normalized_url
+                ).hostname
+                or ""
+            )
+        except Exception:
+            hostname = ""
+
+        hostname = hostname.lower()
+
+        if normalized_domain:
+            domain = normalized_domain
+
+            if domain.startswith(
+                "www."
+            ):
+                domain = domain[4:]
+
+            normalized_hostname = hostname
+
+            if normalized_hostname.startswith(
+                "www."
+            ):
+                normalized_hostname = (
+                    normalized_hostname[4:]
+                )
+
+            if (
+                normalized_hostname == domain
+                or normalized_hostname.endswith(
+                    "." + domain
+                )
+            ):
+                if (
+                    "/blog" in normalized_url
+                    or "/blogs" in normalized_url
+                ):
                     return "official_blog"
 
                 return "official_docs"
 
         # ---------------------------------------------------------
         # Known official domains
-        #
-        # This gives us reasonable classification during the
-        # single-app development phase.
-        #
-        # We will make this dynamic when the batch runner is built.
         # ---------------------------------------------------------
 
         known_official_domains = (
@@ -234,22 +852,75 @@ class ResearchExtractor:
             "twilio.com",
             "zoom.us",
             "dropbox.com",
+            "pipedrive.com",
+            "intercom.com",
+            "asana.com",
+            "zendesk.com",
         )
 
-        if any(
-            domain in normalized_url
-            for domain in known_official_domains
-        ):
-            if "/blog" in normalized_url:
-                return "official_blog"
+        for domain in known_official_domains:
+            normalized_domain_name = (
+                domain.lower()
+            )
 
-            return "official_docs"
+            if (
+                hostname == normalized_domain_name
+                or hostname.endswith(
+                    "." + normalized_domain_name
+                )
+            ):
+                if (
+                    "/blog" in normalized_url
+                    or "/blogs" in normalized_url
+                ):
+                    return "official_blog"
 
-        # ---------------------------------------------------------
-        # Third-party
-        # ---------------------------------------------------------
+                return "official_docs"
 
         return "third_party"
+
+    # =============================================================
+    # Domain extraction
+    # =============================================================
+
+    @staticmethod
+    def _extract_domain(
+        website: str,
+    ) -> str:
+        """
+        Extract hostname/domain from an application website.
+
+        Example:
+
+            https://www.salesforce.com/in/
+            -> www.salesforce.com
+        """
+
+        if not website:
+            return ""
+
+        website = str(
+            website
+        ).strip()
+
+        if "://" not in website:
+            website = (
+                "https://"
+                + website
+            )
+
+        try:
+            hostname = (
+                urlparse(
+                    website
+                ).hostname
+                or ""
+            )
+
+            return hostname
+
+        except Exception:
+            return ""
 
     # =============================================================
     # Gemini prompt
@@ -262,6 +933,10 @@ class ResearchExtractor:
     ) -> str:
         """
         Build the evidence-first Gemini prompt.
+
+        Gemini selects evidence IDs only.
+
+        Python resolves all provenance-sensitive values.
         """
 
         evidence_text = json.dumps(
@@ -277,6 +952,12 @@ Your task is to research the application below using ONLY the
 supplied evidence.
 
 Do not use outside knowledge.
+
+Do not use pretrained knowledge.
+
+Do not guess.
+
+Do not invent facts.
 
 ============================================================
 APPLICATION
@@ -304,14 +985,8 @@ If evidence is insufficient, use:
 
 "Unknown"
 
-Do not guess.
-
-Do not rely on pretrained knowledge.
-
-Do not invent facts.
-
 ============================================================
-EVIDENCE SELECTION
+EVIDENCE IDs
 ============================================================
 
 The supplied web evidence contains stable IDs:
@@ -321,42 +996,115 @@ WEB-002
 WEB-003
 ...
 
-When creating an evidence item:
+Gemini MUST select these IDs.
+
+Gemini MUST NOT generate:
+
+- URLs
+- source names
+- source types
+- evidence snippets
+
+Python will resolve those values from the original evidence.
+
+============================================================
+EVIDENCE ITEM RULES
+============================================================
+
+For every evidence item:
 
 1. Select exactly ONE evidence_id.
 
 2. The evidence_id MUST exactly match one supplied WEB evidence ID.
 
-3. Do NOT invent an evidence ID.
+3. Never invent an evidence_id.
 
-4. Do NOT create a URL.
+4. Never use Composio metadata as an evidence ID.
 
-5. Do NOT create a source name.
+5. Every evidence_id must be unique.
 
-6. Do NOT create a source type.
+6. The claim must be directly supported by that source.
 
-7. Do NOT combine multiple sources into one evidence item.
+7. Do not combine multiple sources into one evidence item.
 
-8. Do NOT create duplicate evidence items for the same evidence ID.
+8. Do not create evidence for unsupported claims.
 
-9. The claim must be directly supported by the selected source.
+9. The evidence item must contain ONLY:
 
-10. The snippet must be based ONLY on the selected source's content.
+   evidence_id
+   claim
 
-Gemini selects the evidence.
+Do NOT return:
 
-Python later resolves:
+   url
+   source_name
+   source_type
+   snippet
 
-- URL
-- source_name
-- source_type
+Python will resolve all of those.
+
+============================================================
+API DOCUMENTATION EVIDENCE
+============================================================
+
+The API object contains:
+
+"documentation_evidence_id"
+
+This MUST be:
+
+- one supplied WEB evidence ID, if API documentation is directly
+  supported by a supplied source
+- null if no suitable source exists
+
+Never generate a URL yourself.
+
+The resulting URL will be resolved by Python.
+
+============================================================
+MCP EVIDENCE
+============================================================
+
+The MCP object contains:
+
+"evidence_id"
+
+This MUST be:
+
+- one supplied WEB evidence ID supporting the MCP classification
+- null when evidence is insufficient
+
+Rules:
+
+Official MCP:
+
+Only when supplied evidence explicitly identifies an official
+MCP implementation from the application/vendor.
+
+Third-party MCP:
+
+Only when supplied evidence explicitly identifies a third-party
+MCP implementation.
+
+No MCP Found:
+
+Only when supplied evidence explicitly supports that conclusion.
+
+Unknown:
+
+When evidence is insufficient.
+
+A Composio toolkit does NOT prove Official MCP.
+
+Never generate an MCP URL.
+
+Python will resolve the URL from evidence_id.
 
 ============================================================
 SOURCE PRIORITY
 ============================================================
 
-When multiple sources support or contradict a claim, prioritize
-evidence in this order:
+When multiple sources support a claim, prefer:
 
 1. Official developer documentation
 2. Official product documentation
@@ -366,10 +1114,6 @@ evidence in this order:
 6. Other third-party sources
 7. Videos/social content
 
-Do not use a lower-authority source to override a higher-authority
-source unless the higher-authority source does not address the
-specific claim.
-
 For:
 
 - authentication
@@ -378,9 +1122,6 @@ For:
 - MCP availability
 
 prefer official documentation whenever available.
-
-Do not add an authentication method merely because a third-party
-source mentions it if authoritative documentation does not support it.
 
 ============================================================
 COMPOSIO
@@ -398,7 +1139,7 @@ It does NOT automatically prove:
 - official application documentation
 
 Never classify an application as Official MCP solely because
-Composio has a toolkit for it.
+Composio has a toolkit.
 
 ============================================================
 AUTHENTICATION
@@ -414,9 +1155,8 @@ Use ONLY:
 "Other"
 "Unknown"
 
-Only include authentication methods directly supported by evidence.
-
-Prefer official documentation over third-party sources.
+Only include authentication methods directly supported by
+the supplied evidence.
 
 ============================================================
 ACCESS
@@ -432,8 +1172,7 @@ Use ONLY:
 "Contact Sales"
 "Unknown"
 
-The existence of public API documentation does NOT automatically
-mean API access is free or self-serve.
+Do not infer access requirements solely from API documentation.
 
 Use direct evidence about:
 
@@ -445,7 +1184,9 @@ Use direct evidence about:
 - sales requirements
 - enterprise requirements
 
-If these are unclear, use "Unknown".
+If unclear:
+
+"Unknown"
 
 ============================================================
 API TYPE
@@ -471,49 +1212,6 @@ Use ONLY:
 "Broad"
 "Unknown"
 
-Narrow:
-Limited API surface.
-
-Moderate:
-Several meaningful resources/functions.
-
-Broad:
-Large API surface covering substantial product functionality.
-
-Unknown:
-Insufficient evidence.
-
-============================================================
-MCP
-============================================================
-
-Use ONLY:
-
-"Official MCP"
-"Third-party MCP"
-"No MCP Found"
-"Unknown"
-
-Official MCP:
-
-Only when supplied evidence explicitly identifies an official
-MCP implementation from the application/vendor.
-
-Third-party MCP:
-
-Only when supplied evidence explicitly identifies a third-party
-MCP implementation.
-
-No MCP Found:
-
-Only when the evidence explicitly supports that conclusion.
-
-Unknown:
-
-Use when evidence is insufficient.
-
-A Composio toolkit does NOT prove Official MCP.
-
 ============================================================
 BUILDABILITY
 ============================================================
@@ -529,8 +1227,7 @@ Use ONLY:
 Easy:
 
 Public API exists, authentication is documented, access is
-reasonably obtainable, and there is no significant integration
-blocker.
+reasonably obtainable, and there is no significant blocker.
 
 Possible:
 
@@ -544,8 +1241,7 @@ or another significant access gate.
 
 Blocked:
 
-Strong evidence indicates the integration cannot reasonably
-be built.
+Strong evidence indicates integration cannot reasonably be built.
 
 Unknown:
 
@@ -560,28 +1256,20 @@ Do NOT automatically use 1.0.
 Use approximately:
 
 0.90 - 1.00
-
 Multiple direct authoritative sources explicitly support the
 conclusion with little ambiguity.
 
 0.75 - 0.89
-
-Strong evidence supports the conclusion with minor uncertainty.
+Strong evidence with minor uncertainty.
 
 0.60 - 0.74
-
-Moderate evidence with some missing or indirect information.
+Moderate evidence with some missing information.
 
 0.40 - 0.59
-
 Weak or incomplete evidence.
 
 0.00 - 0.39
-
 Very uncertain.
-
-Use 1.0 only when evidence is exceptionally direct,
-authoritative, and unambiguous.
 
 ============================================================
 REQUIRED JSON
@@ -589,7 +1277,7 @@ REQUIRED JSON
 
 Return ONLY valid JSON.
 
-Use EXACTLY this structure:
+Use exactly this structure:
 
 {{
   "app_id": {app["id"]},
@@ -611,14 +1299,14 @@ Use EXACTLY this structure:
   "api": {{
     "type": "Unknown",
     "breadth": "Unknown",
-    "documentation_url": null,
+    "documentation_evidence_id": null,
     "confidence": 0.0
   }},
 
   "mcp": {{
     "status": "Unknown",
     "official": null,
-    "url": null,
+    "evidence_id": null,
     "confidence": 0.0
   }},
 
@@ -631,8 +1319,7 @@ Use EXACTLY this structure:
   "evidence": [
     {{
       "evidence_id": "WEB-001",
-      "claim": "Claim directly supported by this source.",
-      "snippet": "Short excerpt based only on this source."
+      "claim": "Claim directly supported by this source."
     }}
   ],
 
@@ -640,29 +1327,7 @@ Use EXACTLY this structure:
 }}
 
 ============================================================
-EVIDENCE OUTPUT REQUIREMENTS
-============================================================
-
-Every evidence item MUST contain:
-
-- evidence_id
-- claim
-- snippet
-
-Every evidence_id MUST correspond to a supplied WEB evidence ID.
-
-Every evidence_id MUST be unique.
-
-Do NOT return:
-
-- url
-- source_name
-- source_type
-
-Python will populate those fields after Gemini responds.
-
-============================================================
-FINAL INTERNAL CHECK
+FINAL CHECK
 ============================================================
 
 Before returning JSON:
@@ -673,19 +1338,27 @@ Before returning JSON:
 
 3. Every claim is supported by its selected source.
 
-4. Every snippet comes only from its selected source.
+4. documentation_evidence_id is either a valid WEB ID or null.
 
-5. Official sources are preferred when available.
+5. MCP evidence_id is either a valid WEB ID or null.
 
-6. MCP classification is supported by evidence.
+6. Authentication is supported by evidence.
 
-7. Access requirements are supported by evidence.
+7. Access classification is supported by evidence.
 
-8. Authentication methods are supported by evidence.
+8. MCP classification is supported by evidence.
 
-9. Do not automatically use confidence 1.0.
+9. Never invent a URL.
 
-10. Return JSON only.
+10. Never invent a source name.
+
+11. Never invent a snippet.
+
+12. Never use Composio metadata as web evidence.
+
+13. Do not automatically use confidence 1.0.
+
+14. Return JSON only.
 
 ============================================================
 SUPPLIED EVIDENCE

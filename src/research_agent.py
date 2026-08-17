@@ -1,8 +1,10 @@
 import json
 from pathlib import Path
 
+from src.analysis import ResearchAnalyzer
 from src.composio_tools import ComposioResearchTool
 from src.extraction import ResearchExtractor
+from src.verifier import ResearchVerifier
 from src.web_tools import WebResearchTool
 
 
@@ -24,9 +26,15 @@ class ResearchAgent:
          ↓
         Structured evidence bundle
          ↓
-        Gemini evidence selection
+        Gemini extraction
          ↓
         Pydantic validation
+         ↓
+        Deterministic verification
+         ↓
+        Deterministic analysis
+         ↓
+        Final research result
     """
 
     def __init__(self) -> None:
@@ -34,19 +42,34 @@ class ResearchAgent:
         self.composio = ComposioResearchTool()
         self.extractor = ResearchExtractor()
 
+        # Phase 2 deterministic quality layers.
+        self.verifier = ResearchVerifier()
+        self.analyzer = ResearchAnalyzer()
+
     def research_app(self, app: dict):
         """
         Research one application and return a validated AppResearch object.
+
+        The research process is split into:
+
+        1. Evidence retrieval
+        2. Evidence ranking and normalization
+        3. Composio discovery
+        4. Gemini extraction
+        5. Deterministic verification
+        6. Deterministic analysis
         """
 
         app_name = app["name"]
-        official_domain = self._extract_domain(app["website"])
+        official_domain = self._extract_domain(
+            app["website"]
+        )
 
         print(f"\nResearching: {app_name}")
 
-        # ---------------------------------------------------------
-        # 1. Web evidence retrieval
-        # ---------------------------------------------------------
+        # =========================================================
+        # 1. WEB EVIDENCE RETRIEVAL
+        # =========================================================
 
         web_evidence = []
         seen_urls = set()
@@ -70,11 +93,11 @@ class ResearchAgent:
             for result in results:
                 url = result.get("url")
 
-                # Skip malformed results.
+                # Ignore malformed search results.
                 if not url:
                     continue
 
-                # Skip duplicate URLs returned by different queries.
+                # Avoid duplicate sources.
                 if url in seen_urls:
                     continue
 
@@ -82,9 +105,15 @@ class ResearchAgent:
 
                 web_evidence.append(
                     {
-                        "title": result.get("title"),
+                        "title": result.get(
+                            "title",
+                            "",
+                        ),
                         "url": url,
-                        "content": result.get("content"),
+                        "content": result.get(
+                            "content",
+                            "",
+                        ),
                         "authority_score": result.get(
                             "authority_score",
                             0,
@@ -93,9 +122,9 @@ class ResearchAgent:
                     }
                 )
 
-        # ---------------------------------------------------------
-        # 2. Rank and filter web evidence
-        # ---------------------------------------------------------
+        # =========================================================
+        # 2. RANK AND FILTER WEB EVIDENCE
+        # =========================================================
 
         web_evidence.sort(
             key=lambda item: item.get(
@@ -105,35 +134,24 @@ class ResearchAgent:
             reverse=True,
         )
 
-        # Keep the strongest evidence only.
+        # Keep only the strongest sources.
         web_evidence = web_evidence[:8]
 
-        # ---------------------------------------------------------
-        # 3. Assign stable evidence IDs
-        # ---------------------------------------------------------
-        #
-        # Gemini will select these IDs instead of generating URLs
-        # and source names itself.
-        #
-        # Example:
-        #
-        # WEB-001 → Salesforce Developers
-        # WEB-002 → Salesforce REST API Guide
-        # WEB-003 → Salesforce OAuth documentation
-        #
-        # Python will later resolve these IDs back to the exact
-        # original URL/title.
-        # ---------------------------------------------------------
+        # =========================================================
+        # 3. ASSIGN STABLE EVIDENCE IDs
+        # =========================================================
 
         for index, item in enumerate(
             web_evidence,
             start=1,
         ):
-            item["evidence_id"] = f"WEB-{index:03d}"
+            item["evidence_id"] = (
+                f"WEB-{index:03d}"
+            )
 
-        # ---------------------------------------------------------
-        # 4. Composio discovery
-        # ---------------------------------------------------------
+        # =========================================================
+        # 4. COMPOSIO DISCOVERY
+        # =========================================================
 
         print("  Composio discovery...")
 
@@ -143,33 +161,41 @@ class ResearchAgent:
 
         if composio_result["toolkit_found"]:
             print(
-                f"  Composio toolkit found: "
+                "  Composio toolkit found: "
                 f"{composio_result['toolkit_slug']}"
             )
 
-            composio_tools = self.composio.get_toolkit_tools(
-                toolkit_slug=composio_result["toolkit_slug"],
-                limit=10,
+            composio_tools = (
+                self.composio.get_toolkit_tools(
+                    toolkit_slug=(
+                        composio_result[
+                            "toolkit_slug"
+                        ]
+                    ),
+                    limit=10,
+                )
             )
 
-            composio_result["sample_tools"] = composio_tools
+            composio_result[
+                "sample_tools"
+            ] = composio_tools
 
         else:
-            print("  No Composio toolkit found.")
+            print(
+                "  No Composio toolkit found."
+            )
 
-        # ---------------------------------------------------------
-        # 5. Build structured evidence bundle
-        # ---------------------------------------------------------
+        # =========================================================
+        # 5. BUILD STRUCTURED EVIDENCE BUNDLE
+        # =========================================================
         #
-        # Web evidence:
-        #   Real sources with stable IDs and URLs.
+        # Web evidence contains real source URLs.
         #
-        # Composio:
-        #   Integration/toolkit metadata.
+        # Composio discovery contains integration metadata.
         #
-        # They remain separate because a Composio toolkit is not
-        # automatically proof of an official application MCP.
-        # ---------------------------------------------------------
+        # These remain separate because a Composio toolkit does not
+        # prove that an application has an official MCP server.
+        # =========================================================
 
         evidence_bundle = [
             {
@@ -178,18 +204,20 @@ class ResearchAgent:
             },
             {
                 "type": "composio_discovery",
-                "items": [composio_result],
+                "items": [
+                    composio_result
+                ],
             },
         ]
 
         print(
-            f"  Web evidence items collected: "
+            "  Web evidence items collected: "
             f"{len(web_evidence)}"
         )
 
-        # ---------------------------------------------------------
-        # 6. Gemini extraction + Pydantic validation
-        # ---------------------------------------------------------
+        # =========================================================
+        # 6. GEMINI EXTRACTION
+        # =========================================================
 
         print("  Gemini analysis...")
 
@@ -199,64 +227,169 @@ class ResearchAgent:
         )
 
         print(
-            f"  Buildability: "
+            "  Buildability: "
             f"{result.buildability.verdict.value}"
         )
 
         print(
-            f"  Confidence: "
+            "  Confidence: "
             f"{result.overall_confidence:.2f}"
         )
+
+        # =========================================================
+        # 7. DETERMINISTIC VERIFICATION
+        # =========================================================
+        #
+        # Important:
+        #
+        # ResearchVerifier.verify() expects:
+        #
+        #     result=AppResearch
+        #     evidence=list[dict]
+        #
+        # It does not accept research=...
+        # =========================================================
+
+        print("  Verifying research...")
+
+        verification = self.verifier.verify(
+            result=result,
+            evidence=evidence_bundle,
+        )
+
+        if verification.passed:
+            print(
+                "  Verification: PASSED"
+            )
+        else:
+            print(
+                "  Verification: FAILED"
+            )
+
+        if verification.errors:
+            print(
+                "  Verification errors: "
+                f"{len(verification.errors)}"
+            )
+
+        if verification.warnings:
+            print(
+                "  Verification warnings: "
+                f"{len(verification.warnings)}"
+            )
+
+        # =========================================================
+        # 8. DETERMINISTIC ANALYSIS
+        # =========================================================
+        #
+        # ResearchAnalyzer.analyze() currently accepts only:
+        #
+        #     research=AppResearch
+        #
+        # Verification is therefore not passed into the analyzer.
+        # =========================================================
+
+        print(
+            "  Analyzing research quality..."
+        )
+
+        analysis = self.analyzer.analyze(
+            research=result,
+        )
+
+        print(
+            "  Analysis complete."
+        )
+
+        # =========================================================
+        # 9. ATTACH PHASE 2 METADATA
+        # =========================================================
+        #
+        # AppResearch remains the canonical Pydantic model.
+        #
+        # Verification and analysis are attached as runtime
+        # attributes for the current Phase 2 integration.
+        # =========================================================
+
+        result._verification = verification
+        result._analysis = analysis
 
         return result
 
     @staticmethod
-    def _extract_domain(website: str) -> str:
+    def _extract_domain(
+        website: str,
+    ) -> str:
         """
         Extract a usable domain from an application website.
 
         Example:
+
             https://www.salesforce.com/in/
             -> www.salesforce.com
         """
 
         website = website.strip()
 
-        website = website.replace(
-            "https://",
-            "",
-            1,
-        )
+        if website.startswith(
+            "https://"
+        ):
+            website = website[
+                len("https://") :
+            ]
 
-        website = website.replace(
-            "http://",
-            "",
-            1,
-        )
+        elif website.startswith(
+            "http://"
+        ):
+            website = website[
+                len("http://") :
+            ]
 
-        website = website.split("/")[0]
+        website = website.split(
+            "/",
+            1,
+        )[0]
 
         return website
 
 
 def load_apps() -> list[dict]:
-    """Load the 100-app research dataset."""
+    """
+    Load the application research dataset.
+    """
 
-    path = Path("data/apps.json")
+    path = Path(
+        "data/apps.json"
+    )
+
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Application dataset not found: {path}"
+        )
 
     with path.open(
         "r",
         encoding="utf-8",
     ) as file:
-        return json.load(file)
+        apps = json.load(file)
+
+    if not isinstance(
+        apps,
+        list,
+    ):
+        raise ValueError(
+            "data/apps.json must contain a JSON list."
+        )
+
+    return apps
 
 
 def main() -> None:
     """
     Run the researcher against one application.
 
-    We intentionally run only the first application while
-    validating the research pipeline.
+    During development we intentionally process only the first
+    application.
     """
 
     apps = load_apps()
@@ -270,17 +403,110 @@ def main() -> None:
 
     agent = ResearchAgent()
 
-    result = agent.research_app(app)
+    result = agent.research_app(
+        app
+    )
 
-    print("\n" + "=" * 70)
-    print("FINAL RESULT")
-    print("=" * 70)
+    # =============================================================
+    # FINAL RESEARCH RESULT
+    # =============================================================
+
+    print(
+        "\n"
+        + "=" * 70
+    )
+
+    print(
+        "FINAL RESULT"
+    )
+
+    print(
+        "=" * 70
+    )
 
     print(
         result.model_dump_json(
             indent=2
         )
     )
+
+    # =============================================================
+    # VERIFICATION SUMMARY
+    # =============================================================
+
+    verification = getattr(
+        result,
+        "_verification",
+        None,
+    )
+
+    if verification is not None:
+        print(
+            "\n"
+            + "=" * 70
+        )
+
+        print(
+            "VERIFICATION"
+        )
+
+        print(
+            "=" * 70
+        )
+
+        if hasattr(
+            verification,
+            "model_dump_json",
+        ):
+            print(
+                verification.model_dump_json(
+                    indent=2
+                )
+            )
+
+        else:
+            print(
+                verification
+            )
+
+    # =============================================================
+    # ANALYSIS SUMMARY
+    # =============================================================
+
+    analysis = getattr(
+        result,
+        "_analysis",
+        None,
+    )
+
+    if analysis is not None:
+        print(
+            "\n"
+            + "=" * 70
+        )
+
+        print(
+            "ANALYSIS"
+        )
+
+        print(
+            "=" * 70
+        )
+
+        if hasattr(
+            analysis,
+            "model_dump_json",
+        ):
+            print(
+                analysis.model_dump_json(
+                    indent=2
+                )
+            )
+
+        else:
+            print(
+                analysis
+            )
 
 
 if __name__ == "__main__":
